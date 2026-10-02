@@ -9,30 +9,47 @@
  * you would have to reopen Excel to change is a number nobody ever tests a scenario against,
  * and scenario-testing is the whole point of a runway.
  *
- * Until the Balances and You tabs exist (slice 2) the figures come from a fictional demo
- * profile, and the panel says so rather than letting a made-up balance read as the reader's.
+ * Until a reader supplies a You tab and a Balances tab, the figures are the AUTHOR'S OWN,
+ * and the panel says whose they are rather than letting somebody else's retirement read as
+ * the reader's. Real numbers make that disclosure more important rather than less: a made-up
+ * $180,000 spend reads as a placeholder, while a real $328,983 one reads as a claim about
+ * whoever is looking at it.
  */
 (function (root) {
   'use strict';
 
-  /* A FICTIONAL profile. Not the operator's, not any GC member's, and deliberately round
-     so nobody mistakes it for a real statement. Slice 2 replaces this with the sheet. */
+  /* THE AUTHOR'S REAL PROFILE, so the demo can be checked against something rather than
+     admired. Every figure is read from a recorded source and none is invented:
+
+       birthYear   retirement "was fixed at 2032-01-01, age 62"
+       spend       250,000 * 1.04^(62-55), W-2 replacement at the stated retirement age
+       floorSpend  THE SAME NUMBER on purpose. The stated objective is to "guarantee a
+                   $330K/yr income floor by age 62" and no separate essentials figure
+                   exists, so the target IS the floor. That makes the guardrail and
+                   floor-first modes inert on this profile, which is a true thing about
+                   the plan rather than a bug in the demo.
+       benefit     claimed at max(62, retirement age), because claiming at 62 while still
+                   earning would have nearly all of it withheld.
+
+     THE SLEEVES EXCLUDE THE PRIVATE BOOK. Those arrive from the deal file, so putting the
+     self-directed IRA in as a balance would count them twice -- its line-item reconcile
+     splits it into deal assets plus cash, and only the cash is here. What remains is the
+     liquid side: the growth account's equities, the options-income account, and the cash
+     across both. Gold held inside the self-directed IRA sits with the deal assets rather
+     than in a sleeve, which is a small known imprecision. */
   const DEMO = {
-    label: 'a worked example, not your numbers',
-    birthYear: 1975,
-    stopYear: 2035,
+    label: 'the author\u2019s own figures, so you can see what a filled-in plan looks like',
+    birthYear: 1970,
+    stopYear: 2032,
     planToAge: 92,
-    spend: 180000,
-    floorSpend: 120000,
-    benefitAge: 67,
-    benefitAnnual: 40000,
-    /* Deliberately a plan that is GOOD BUT NOT SAFE -- around three runs in four. A demo
-       that never falls short shows none of what this tab is for: every lever reads +0.0
-       and the reader learns nothing about their own tighter plan. */
+    spend: 328983,
+    floorSpend: 328983,
+    benefitAge: 62,
+    benefitAnnual: 33264,
     sleeves: [
-      { id: 'growth', label: 'Growth', kind: 'growth', balance: 900000 },
-      { id: 'income', label: 'Income', kind: 'income', balance: 400000 },
-      { id: 'cash', label: 'Cash', kind: 'cash', balance: 150000 },
+      { id: 'growth', label: 'Growth', kind: 'growth', balance: 430805 },
+      { id: 'income', label: 'Income', kind: 'income', balance: 335041 },
+      { id: 'cash', label: 'Cash', kind: 'cash', balance: 363552 },
     ],
   };
 
@@ -295,9 +312,11 @@
      there is no way to tell which half to trust. */
   function sourceNote(port) {
     if (!port) {
-      return '<p class="note"><b>These are ' + esc(DEMO.label) + '</b> — a fictional '
-        + 'profile, so the page is useful before you have typed anything. Add a <b>You</b> '
-        + 'tab and a <b>Balances</b> tab to your tracker and the runway runs on yours.</p>';
+      return '<p class="note"><b>These are ' + esc(DEMO.label) + '.</b> They are real '
+        + 'figures, which is what makes the page worth reading before you have typed '
+        + 'anything — and they are <b>somebody else’s</b>. Add a '
+        + '<b>You</b> tab and a <b>Balances</b> tab to your tracker and the runway runs on '
+        + 'yours instead.</p>';
     }
     const bits = [];
     if (port.you) {
@@ -311,7 +330,8 @@
         + ' across ' + port.sleeves.length + ' sleeve' + (port.sleeves.length === 1 ? '' : 's'));
     }
     let h = '<p class="note"><b class="pos">Running on your sheet.</b> ' + bits.join(', and ')
-      + '. Anything your sheet did not say still comes from the worked example.</p>';
+      + '. Anything your sheet did not say still comes from the author’s own '
+      + 'figures, so a blank on your sheet is not a blank on this page.</p>';
 
     /* A sleeve with no stated return runs on the model's opinion, and that is worth a line
        rather than a footnote nobody reads. */
