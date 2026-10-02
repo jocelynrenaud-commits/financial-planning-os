@@ -1,0 +1,39 @@
+{
+  "slug": "halcyon-hospitality",
+  "name": "Halcyon Hospitality Partners",
+  "aliases": [
+    "Halcyon Hospitality Partners",
+    "Halcyon Hospitality",
+    "Halcyon",
+    "Halcyon Partners"
+  ],
+  "sponsor": "Halcyon Asset Group",
+  "assetClass": "Real Estate",
+  "vehicle": "Fund",
+  "subStrategy": "Value-add hospitality, no preferred return",
+  "terms": {
+    "holdYears": 6,
+    "sponsorMoic": 2.15,
+    "mgmtFee": 0.01,
+    "ltvPct": 0.72,
+    "holdNote": "Six years, with the refurbishment front-loaded into the first two.",
+    "carry": "20% over a 1x return of capital"
+  },
+  "liquidity": {
+    "fromYear": 5,
+    "toYear": 6,
+    "source": "Sale after the refurbishment stabilises"
+  },
+  "dealsInFund": 4,
+  "singleCompany": false,
+  "structure": "Four hotels being refurbished and re-let, at 72% loan-to-value and paying nothing while the work happens. It quotes no preferred return, so it is priced on the real-estate equity table: levered property can go to zero, but nothing like one deal in three, and the outcome it most often produces is a haircut.",
+  "sections": [
+    {
+      "title": "What it is",
+      "body": "Value-add hospitality with no coupon. The whole return is in the sale, and the leverage is what decides the downside."
+    }
+  ],
+  "_about": "FICTIONAL DEMO DATA. This deal does not exist. It is here so the app can be tried on something before you load your own numbers, and the terms are invented to exercise the model rather than to describe any real offering.",
+  "asOf": "2026-10-01",
+  "source": "FICTIONAL. Invented for the demo dataset; no real offering is described."
+}

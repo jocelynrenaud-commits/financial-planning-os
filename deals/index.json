@@ -1,0 +1,83 @@
+{
+  "about": "Index of shareable deal files. The app matches a row in your tracker to one of these by name or alias and fills in the terms, so you only have to type your own numbers. A deal that is not listed still works; you just supply its terms yourself. EVERY DEAL IN THIS DEMO IS FICTIONAL.",
+  "asOf": "2026-10-01",
+  "deals": [
+    {
+      "slug": "northwind-robotics",
+      "name": "Northwind Robotics",
+      "aliases": [
+        "Northwind Robotics",
+        "Northwind",
+        "Northwind Robotics, Inc."
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Lantern Syndicate (SPV) · Northwind Robotics"
+    },
+    {
+      "slug": "harbourline-ventures-ii",
+      "name": "Harbourline Ventures Fund II",
+      "aliases": [
+        "Harbourline Ventures Fund II",
+        "Harbourline II",
+        "Harbourline Ventures",
+        "HVF II"
+      ],
+      "assetClass": "VC",
+      "vehicle": "Fund",
+      "sponsor": "Harbourline Capital"
+    },
+    {
+      "slug": "cedar-mill-credit",
+      "name": "Cedar Mill Credit Fund",
+      "aliases": [
+        "Cedar Mill Credit Fund",
+        "Cedar Mill",
+        "Cedar Mill Credit",
+        "CMCF"
+      ],
+      "assetClass": "Private Credit",
+      "vehicle": "Fund",
+      "sponsor": "Cedar Mill Partners"
+    },
+    {
+      "slug": "stonebrook-industrial-iii",
+      "name": "Stonebrook Industrial Fund III",
+      "aliases": [
+        "Stonebrook Industrial Fund III",
+        "Stonebrook III",
+        "Stonebrook Industrial",
+        "Stonebrook"
+      ],
+      "assetClass": "Real Estate",
+      "vehicle": "Fund",
+      "sponsor": "Stonebrook Real Assets"
+    },
+    {
+      "slug": "halcyon-hospitality",
+      "name": "Halcyon Hospitality Partners",
+      "aliases": [
+        "Halcyon Hospitality Partners",
+        "Halcyon Hospitality",
+        "Halcyon",
+        "Halcyon Partners"
+      ],
+      "assetClass": "Real Estate",
+      "vehicle": "Fund",
+      "sponsor": "Halcyon Asset Group"
+    },
+    {
+      "slug": "vantage-point-growth",
+      "name": "Vantage Point Growth Partners",
+      "aliases": [
+        "Vantage Point Growth Partners",
+        "Vantage Point",
+        "Vantage Point Growth",
+        "VPGP"
+      ],
+      "assetClass": "Private Equity",
+      "vehicle": "SPV",
+      "sponsor": "Vantage Point Capital · Meridian Services Group"
+    }
+  ]
+}

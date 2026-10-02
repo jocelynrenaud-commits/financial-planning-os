@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financial Planning OS</title>
+<meta name="description" content="Everything you hold in private markets, and when it might pay you back. Runs entirely in your browser.">
+<style>
+  :root{
+    --bg:#F7F9FC; --card:#FFFFFF; --ink:#141A22; --muted:#6B7A8C; --rule:#DCE3EC;
+    --navy:#1F3864; --green:#2E6B52; --red:#A33A1F; --amber:#9C6B1A;
+    --vc:#7B5EA7; --inc:#B17930; --all:#2E6B52;
+    --mono:ui-monospace,"Consolas","SFMono-Regular",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:28px 16px 80px}
+  h1{font-size:30px;margin:0 0 6px;color:var(--navy);letter-spacing:-.2px}
+  h2{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--navy);margin:0 0 10px}
+  .sub{color:var(--muted);margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:10px;
+        padding:20px 22px;margin-bottom:16px}
+  .note{font-size:14px;color:var(--muted);line-height:1.65;max-width:900px}
+  .note b{color:var(--ink)}
+  .warn{color:var(--red);font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+     text-align:right;padding:8px 10px;border-bottom:1px solid var(--rule);font-weight:700}
+  th.l,td.l{text-align:left}
+  td{text-align:right;padding:7px 10px;font-family:var(--mono);border-bottom:1px solid #EFF2F6}
+  tr:last-child td{border-bottom:none}
+  .z{color:#A8B3C0}
+  .neg{color:var(--red);font-weight:700}
+  .pos{color:var(--green)}
+  .b{font-weight:700}
+  .hi{background:#EEF6F1}
+  button{font:inherit;font-size:14px;padding:8px 14px;border:1px solid var(--rule);
+         background:#fff;color:var(--ink);border-radius:7px;cursor:pointer}
+  button:hover{border-color:#B9C6D8}
+  button.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  /* the three tabs. Bigger than the in-card toggles, because they change the whole page */
+  .tabs{gap:6px;margin:4px 0 16px;border-bottom:1px solid var(--rule);padding-bottom:0}
+  .tabs button{font-size:15px;padding:11px 18px;border:none;border-bottom:3px solid transparent;
+               border-radius:8px 8px 0 0;background:none;color:var(--muted);font-weight:600}
+  .tabs button:hover{color:var(--ink);background:#EEF3FA}
+  .tabs button.on{background:none;color:var(--navy);border-bottom-color:var(--navy)}
+  .drop{border:2px dashed #C3CEDD;border-radius:12px;padding:34px 20px;text-align:center;
+        background:#FBFCFE;transition:.15s}
+  .drop.over{border-color:var(--navy);background:#EEF3FA}
+  .drop h3{margin:0 0 6px;font-size:19px;color:var(--navy)}
+  .drop p{margin:0 0 14px;color:var(--muted);font-size:14px}
+  .privacy{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--green);
+           background:#EDF6F1;border:1px solid #CBE4D7;border-radius:999px;padding:6px 14px;margin-top:14px}
+  /* Folded depth. The long explanations keep every word; they just stop being the first
+     thing you read. A summary is a heading you can act on, so it is styled like one. */
+  details.more{border-top:1px solid var(--rule);margin-top:10px}
+  details.more>summary{cursor:pointer;list-style:none;padding:10px 0;font-size:14px;
+    font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+  details.more>summary::-webkit-details-marker{display:none}
+  details.more>summary::before{content:'+';color:var(--muted);width:11px;text-align:center}
+  details.more[open]>summary::before{content:'\2212'}
+  details.more>summary:hover{color:var(--green)}
+  details.more>.note{margin-top:0}
+  details.more>.note:last-child{margin-bottom:14px}
+  .glos{display:flex;gap:18px;margin-bottom:12px;align-items:flex-start}
+  .glos .t{flex:0 0 190px;font-weight:700;font-size:14px}
+  .glos .d{flex:1;color:var(--muted);font-size:14px;line-height:1.65}
+  .kpi{display:flex;gap:26px;flex-wrap:wrap;margin-top:6px}
+  .kpi div small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .kpi div span{font-family:var(--mono);font-size:21px;font-weight:700}
+  .err{background:#FDF3EC;border:1px solid #F0D3BE;border-radius:8px;padding:14px 16px;
+       color:#7A3A15;font-size:14px;margin-bottom:14px}
+  .hidden{display:none}
+  footer{color:var(--muted);font-size:13px;margin-top:30px;line-height:1.7}
+  a{color:var(--navy)}
+  /* Version badge. Pinned bottom-left so it is findable without being in the way, and
+     semi-transparent until hovered so it never competes with the numbers. */
+  .ver{position:fixed;left:12px;bottom:12px;z-index:20;font-family:var(--mono);
+       font-size:11px;letter-spacing:.02em;color:var(--muted);background:rgba(255,255,255,.92);
+       border:1px solid var(--rule);border-radius:999px;padding:4px 11px;opacity:.72;
+       transition:opacity .15s;cursor:pointer;user-select:none}
+  .ver:hover{opacity:1;border-color:#B9C6D8}
+  .ver:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+  /* release notes */
+  .mask{position:fixed;inset:0;z-index:40;background:rgba(20,26,34,.45);
+        display:flex;align-items:center;justify-content:center;padding:20px}
+  /* .hidden is declared earlier in this sheet, so on equal specificity .mask's
+     display:flex won it and the dialog opened on load and would not close. Two
+     classes beat one, so this is the rule that actually decides it. */
+  .mask.hidden{display:none}
+  .modal{background:var(--card);border-radius:12px;max-width:680px;width:100%;
+         max-height:86vh;overflow:auto;padding:26px 28px;box-shadow:0 18px 50px rgba(20,26,34,.28)}
+  .modal h3{margin:0 0 2px;font-size:21px;color:var(--navy)}
+  .modal .when{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 18px}
+  .modal h4{margin:20px 0 6px;font-size:15px;color:var(--ink)}
+  .modal p{margin:0 0 10px;font-size:14.5px;line-height:1.66;color:#36424F}
+  .modal .rel{border-top:1px solid var(--rule);padding-top:16px;margin-top:20px}
+  .modal .tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--muted);
+              border:1px solid var(--rule);border-radius:999px;padding:2px 9px;margin-bottom:8px}
+  .modal .close{margin-top:22px}
+  @media (max-width:700px){ .wrap{padding:18px 12px 60px} h1{font-size:24px} .glos{display:block} .glos .t{margin-bottom:4px}
+    .ver{left:8px;bottom:8px;font-size:10px;padding:3px 9px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Financial Planning OS</h1>
+  <p class="sub">Everything you own, when you can actually reach it, and whether it lasts.
+    Private deals, public markets and property in one place, because the question is never
+    about one of them on its own. It will still not give you a predicted exit date, because
+    nobody has one.</p>
+
+  <div class="card" id="intake">
+    <div class="drop" id="drop">
+      <h3>Drop your tracker here</h3>
+      <p>An .xlsx or .csv with one row per position. Or pick a file.</p>
+      <div class="row" style="justify-content:center;margin:0">
+        <button id="pick">Choose file</button>
+        <button id="demo">Run the example book</button>
+      </div>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hidden">
+      <div class="privacy">
+        <span>&#128274;</span>
+        <span>Everything runs in your browser. Your file is never uploaded anywhere.</span>
+      </div>
+    </div>
+    <div id="intakeErr"></div>
+  </div>
+
+  <div id="out" class="hidden"></div>
+
+  <footer>
+    Not advice. The outcome probabilities are assumptions and are meant to be argued with.
+    Source and the tracker template are in the repository.
+  </footer>
+</div>
+
+<button class="ver" id="ver" type="button" title="What changed, and when"></button>
+
+<div class="mask hidden" id="relMask">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="relTitle">
+    <h3 id="relTitle">What&rsquo;s new</h3>
+    <p class="when" id="relWhen"></p>
+
+    <p>Every time the maths behind this tool changes, the version at the bottom of the
+      page changes with it. It is worth knowing which one you were looking at, because
+      two answers produced by different versions are not directly comparable.</p>
+
+    <div class="rel">
+      <span class="tag">v1.39 &nbsp;&middot;&nbsp; 1 Oct 2026</span>
+      <h4>The tracker itself now has the two capital-call columns</h4>
+      <p><b>You do not have to download anything.</b> The columns are optional and the app works exactly as it always has without them, so an existing tracker keeps producing the figures it produced yesterday. This is only for people who want to start dating their calls.</p>
+      <p>If you do, you have two ways in and neither needs a migration: <b>add the two columns to the sheet you already have</b> &mdash; headed <b>Next call date</b> and <b>Next call amount</b>, anywhere in the row, since columns are matched by name and not by position &mdash; or download the new <b>TRACKER v1.8</b> and move your rows across. The first is less work.</p>
+      <p>The template marks them yellow like every other cell you fill in, carries a worked example on the Asilia GC Fund row so the date format is visible rather than described, and the Read me explains what happens when you leave them blank. The version in the top-left of the Positions tab now reads v1.8.</p>
+
+      <span class="tag">v1.38 &nbsp;&middot;&nbsp; 1 Oct 2026</span>
+      <h4>Tell it when your next capital call is due, and it stops guessing</h4>
+      <p><b>Two optional columns: Next call date and Next call amount.</b> Leave them blank and nothing changes. Fill them in and the tool uses what you know instead of what it assumed. Sponsors rarely publish a call schedule, so until now it took whatever was still uncalled and spread it evenly over about three years from the year after you funded. That is a reasonable guess and it is still the fallback, but it was being asserted over people who had better information, which is the opposite of how the rest of this works.</p>
+      <p><b>Any spelling of the date works</b> &mdash; 2027, Q1 2027, 2027-03, March 2027 &mdash; because only the year is used. This calendar is annual, and holding the quarter would imply a precision nothing downstream uses. With a date <i>and</i> an amount, that amount lands in that year and the remainder spreads after it. With the date alone, nothing is shown arriving before it, which is usually the thing you actually want to say.</p>
+      <p><b>An amount with no date is refused, out loud.</b> There is no year to put it in, and choosing one would invent exactly the thing the column exists to stop. Those rows fall back to the even spread and the panel names them, because a column you filled in that quietly did nothing is worse than no column at all.</p>
+      <p>The panel also lists which positions came from your tracker rather than from the model, and echoes your date back as you wrote it so you can see it was read correctly. A year you have dated yourself no longer shows the <i>still ahead</i> estimate, since pro-rating a known date by months elapsed would be the tool second-guessing the one person who knows.</p>
+      <p><i>Under the hood:</i> this panel had grown its own second copy of the call schedule, so the rule lived in two files and could drift without either looking wrong. It now calls the same function the simulation does.</p>
+
+      <span class="tag">v1.37 &nbsp;&middot;&nbsp; 1 Oct 2026</span>
+      <h4>Three more from Kristin Westergard, all about reading the screen</h4>
+      <p><b>The gold preferred-return lines on the ladder now carry their amount</b>, which the exit blocks have had since the chart shipped. Hover either. The figure was always being calculated, it was just never attached to the one element that arrives on a promised schedule rather than on a hope.</p>
+      <p><b>The capital-calls year now says what it is.</b> Asked whether it meant what has been called so far or what is left, and the honest answer is neither. Sponsors rarely publish a call schedule, so the tool takes whatever is still uncalled and spreads it evenly over about three years from the year after you funded. Every row is therefore a <b>full calendar year, modelled rather than scheduled</b>, and the current one includes the months already gone. The current year is now marked, and carries roughly how much of it is still ahead. <b>If you know a real call date, yours beats this</b> &mdash; a column to tell it so is next.</p>
+      <p><b>And you can now see which positions produce the cash in a given year.</b> Under the ladder, position by position, preferred return and exit split out. It deliberately sits there rather than under Cumulative cash received, and that is worth a sentence: the cumulative table is <i>percentiles</i>, where each row is whichever future happened to land at the 10th, 50th or 90th that year, and they are different futures. No set of deals makes up a percentile, so breaking one down would be inventing a fact. The ladder is a schedule, so it can be attributed, and the breakdown says plainly that it does not add up to the percentile tables.</p>
+
+      <span class="tag">v1.36 &nbsp;&middot;&nbsp; 1 Oct 2026</span>
+      <h4>&ldquo;&gt;1000%&rdquo; was not a return. It was the solver giving up.</h4>
+      <p><b>Found by Kristin Westergard, and it is the most consequential thing anyone has reported.</b> The by-deal table on Performance &amp; Returns showed a good run of <b>&gt;1000%</b> against the Asilia Credit Fund Evergreen. Read as written, that says the fund has an extraordinary upside and no downside. It was not a return at all. It was the bisection solver hitting the top of its search range and the table printing the range.</p>
+      <p><b>Why it happened, and who else saw it.</b> When most of a commitment is still uncalled, the preferred return starts arriving while the capital is still in your account. So cash comes back <i>before</i> the rest of it goes out, and there is no single annual rate that describes that shape &mdash; mathematically there can be several, or none below 1000%. On a test position of $400,000 committed against $20,000 funded, <b>19% of runs could not be solved at all</b>. This was never specific to ACFE: <b>any position paying a preferred return with a large uncalled balance</b> could do it, which on a typical Growth Circle book also means the <b>Asilia GC Fund</b> and <b>BlueBird Capital</b>.</p>
+      <p><b>The engine always knew.</b> It has labelled these runs internally since the rate of return was added, and nothing ever displayed the label. A run it could not solve was counted and then quietly folded in with the ones it could.</p>
+      <p><b>What changes.</b> A rate that cannot be solved is now reported as unsolved rather than as the ceiling, and the unsolved runs keep their place at the top of the ordering instead of being deleted from it &mdash; deleting them is the quieter version of the same error, because the runs that break are the <i>highest</i> ones, so dropping them hands you a complete-looking band built only from the runs that behaved. So the good run now reads n/a exactly when a tenth or more of the runs are unsolvable, while the typical column is unaffected. <b>The table now names the deals involved, the share of runs, and the reason</b>, and points you at the multiple on capital, which is unaffected and is the more honest measure for a part-funded position anyway: a high rate on money you have not sent yet is not a return you can spend.</p>
+      <p><b>If your positions are fully called, not one figure moves.</b> That was checked rather than assumed.</p>
+
+      <span class="tag">v1.35 &nbsp;&middot;&nbsp; 30 Sep 2026</span>
+      <h4>Real estate is no longer priced as if it were a startup</h4>
+      <p><b>The outcome table was chosen by one question: does the deal quote a preferred return.</b> Nothing else. So <b>Philo Hospitality Fund</b> &mdash; a hospitality fund holding three properties, with the sponsor projecting 2.08x &mdash; fell through to the table built for a <i>single venture company</i>, at a <b>30% chance of returning nothing</b>. Expected outcome over six years: 1.00x. Your money back and not one dollar more. Meanwhile Eephus, also real estate, quotes a 6% pref and sat on the income table at 5%. Two real estate funds, a six-fold difference in the chance of a total loss, decided by whether the sponsor happened to quote a pref rather than by anything about the buildings.</p>
+      <p><b>Real estate that pays no coupon now has a table of its own, and it sits between the two.</b> One in ten to zero, three in ten below cost, and &mdash; the part neither old table had &mdash; a branch where you simply take a haircut and get about 70 cents back. That is the outcome levered property actually produces most often. Philo now expects <b>1.22x</b> rather than 1.00x, with a <b>10%</b> chance of returning nothing rather than 30%. <b>If you hold Philo, your downside got materially better between v1.34 and v1.35</b>, and that is the correction, not a new opinion.</p>
+      <p><b>Eephus has NOT moved</b> and is priced exactly as it was. Its pref is what keeps it on the income table, and a test now pins its expected value to the dollar so a later change here cannot quietly drag it along.</p>
+      <p><b>Leverage is what decides whether property can go to zero</b>, so those weights are the reading at a 65% loan-to-value and there is a dial keyed to it: less leverage moves weight out of the total-loss bucket, more moves it in. No deal on file records its LTV yet, so every one of them is being read at 65% and the card says so rather than implying the sponsor supplied it. <b>If you know the real LTV on something you hold, that is worth telling me</b> &mdash; it is the single input that most changes these numbers.</p>
+      <p><b>And a correction the new test found on its way past.</b> A card showed the preferred return the deal is <i>scheduled</i> to pay, listed under the heading <i>What the model makes of it</i>, right beside the expected exit. But the model does not assume a pref gets paid in full: a deal that is written off pays a quarter of it, one that lands well below plan pays 70%. So anyone adding the two lines together was reading a total the rest of the app never produced, high by <b>4% to 9%</b> on every deal here that pays a preferred return &mdash; Eephus I and II, both Asilia funds and BlueBird. The card now shows what the model expects to be paid, with the scheduled figure kept beside it, because the contractual number is still worth knowing. <b>Nothing about how these deals are modelled has changed</b>; the simulation on Liquidity Outlook was always doing this correctly and the card was not.</p>
+      <p>Also: <b>Rorra&rsquo;s sponsor</b> now reads Spacestation Investments &middot; Rorra, matching the other Spacestation deals. It was corrected in v1.34 but a deal-file change is cached against the app version, so it could not actually reach anyone until this bump.</p>
+
+      <span class="tag">v1.34 &nbsp;&middot;&nbsp; 30 Sep 2026</span>
+      <h4>Two corrections to Asilia, and the matching bug the second one uncovered</h4>
+      <p><b>The Asilia GC Fund does not start paying immediately.</b> The tool said quarterly distributions beginning straight away. Austin Read confirmed the first one is for Q4 2026 and is paid 45 to 60 days after quarter end, so it arrives around <b>February 2027</b>. That is roughly a year later than the tool assumed, on a fund whose case is quarterly cash while you wait. He also confirmed distributions are calculated on <b>called</b> capital and grow as more is drawn, which is the same thing the preferred-return fix in v1.24 corrected. About 19% had been called as at 30 September.</p>
+      <p><b>The Asilia Debt Fund (2025) has been removed.</b> It was never offered to Growth Circle. The December 2025 session was titled &ldquo;Asilia Debt Fund Live Pitch&rdquo;, which is where this came from, but the vehicle actually offered that day was the Credit Fund Evergreen. The 2025 fund was the track record behind it, not something members could buy. The sequence is Evergreen, offered December 2025 and closed February 2026, then the Asilia GC Fund in April 2026. A tab called Loaded GC Deals should not list something GC was never offered, so the record is gone rather than relabelled. If you hold it independently it still works, it just runs on what your own sheet says. The Evergreen fund also drops &ldquo;Fund II&rdquo; from its name.</p>
+      <p><b>A removed deal’s name no longer starts meaning a different deal.</b> The tool matches what you typed against the names it knows, and when a name could mean two of them it deliberately resolves to nothing rather than guess. That protection was accidental: it lasted only as long as both vehicles had a file. With the 2025 fund gone, <i>Asilia Credit Fund I</i> was left matching the Evergreen fund as the only candidate standing, so it would have resolved cleanly and filled in Evergreen’s coupon, term and redemption gate against a position that is not Evergreen. The index now names the vehicles it knows about but does not carry, those names resolve to nothing on purpose, and the Loaded GC Deals tab says which they are and why. <b>If you hold Asilia Credit Fund I, check that row</b> — on v1.34 it fills in nothing and waits for your terms, which is correct, and on nothing earlier did it fill in the wrong ones.</p>
+
+      <span class="tag">v1.33 &nbsp;&middot;&nbsp; 29 Sep 2026</span>
+      <h4>It speaks in sleeves now</h4>
+      <p>The app called your holdings a <i>book</i>, which is trading desk language nobody in
+        Growth Circle actually uses. It now says <b>sleeve</b> and <b>portfolio</b> throughout:
+        Your portfolio, Your allocation, Which sleeve, Outcome range by sleeve, Blended
+        portfolio, Your positions. The typical run is labelled as what it is, <b>the median</b>.</p>
+      <p><b>The range chart reads back harder.</b> It now points out how differently wide the
+        three sleeves are, and what holding both actually bought you: the blend gives up a
+        little at the top and buys far more at the bottom. It also says plainly which number
+        is missing from that picture &mdash; <b>when</b> &mdash; and sends you to the ladder
+        for it.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.31 &nbsp;&middot;&nbsp; 29 Sep 2026</span>
+      <h4>The dashboard shows the actual odds</h4>
+      <p>The two multiples used to be explained in words. They now carry <b>the real
+        distribution</b>, read straight from the model so the sentence cannot drift away from
+        the numbers it describes: a single venture deal is 30% written off, 30% back at cost,
+        30% at 1.65x and 10% at the sponsor case, while the income sleeves run 5/25/55/15.</p>
+      <p><b>A fund holding twenty or more deals gets its own wider ladder</b>, which is why the
+        text no longer says &ldquo;all four outcomes&rdquo; &mdash; that was never true of the
+        largest position in the example book. The tiles are now <b>Sponsor MOIC</b> and
+        <b>Modelled MOIC</b>, and the panels read Your portfolio, Your allocation, Capital
+        calls vs. preferred income, and Your deals.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.30 &nbsp;&middot;&nbsp; 29 Sep 2026</span>
+      <h4>A deal card reads in sections now</h4>
+      <p>The written part of a card was one long block. It is now headed sections &mdash;
+        <b>what it is</b>, <b>who runs it</b>, <b>the numbers</b>, and a final section that
+        is whatever that particular deal turns on. The headings live with each deal rather
+        than in the code, because a fund has a sponsor where a company has founders, and what
+        a deal hinges on is never the same twice. <b>What to watch</b> is unchanged.</p>
+      <p><b>Where a card's figures were sourced from is no longer shown.</b> Those were notes
+        to ourselves about how well documented a deal is, and reading them invites you to
+        weigh the citation instead of the deal. The tracking has not gone away &mdash; it
+        moved somewhere it can be acted on.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.29 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>Tovala</h4>
+      <p>The twenty-third deal card, and an unusual one. It is a <b>secondary purchase of
+        common stock</b> rather than a raise: nothing goes onto the company's balance sheet,
+        because it has not needed outside capital since 2022. Spacestation is the lead, so it
+        set the terms.</p>
+      <p>Entry is at roughly the same valuation as the 2022 priced round, when revenue was
+        about a quarter of today's and the business was losing money. The card carries what
+        that costs you: it is <b>common stock behind $110.5M of preferred</b>, and it is
+        <b>not QSBS-eligible</b>, which several other deals on this list are.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.28 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>The ladder says how much, not just how much more</h4>
+      <p>The <b>Expected in the year</b> row at the foot of the maturity ladder now prints its
+        amount above each block. The figures were there before, but only on hover, which meant
+        they did not exist on a printed page, on a phone, or for anyone reading the chart
+        rather than poking at it. The bars top out at sixteen pixels and carry no scale, so
+        without a number the row could only say <i>more in 2033 than in 2027</i>.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.27 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>A yield on uncalled money can now run out</h4>
+      <p><b>Austin Read at Asilia answered the question Kristin Westergard put to him</b>, and
+        the answer was more specific than anyone expected. Uncalled commitments in ACFE do
+        earn before any capital is called, at roughly <b>6&ndash;7% annualised</b> rather than
+        the 4% first reported. But it is not an investment return: it comes from the fund's
+        <b>subscription line</b>, which is borrowing, and borrowing matures. It ends when that
+        line does, at the end of June 2027. After that the return is on called capital only.</p>
+      <p>The tool could not express that. A rate on uncalled capital applied for the whole
+        hold, which would have run a temporary financing arrangement out to 2034 and invented
+        years of income. <b>A yield on uncalled capital now carries the date it stops</b>, and
+        the last year counts only the part of it actually earned.</p>
+      <p>Two things worth knowing. The accrued earnings are <b>netted against your first
+        capital call</b> rather than paid out &mdash; the same arithmetic, but not money in
+        your pocket. And Austin answered <b>for ACFE</b>. The Asilia GC Fund is the
+        fund-of-funds that holds ACFE as one of three sleeves, and whether any of this reaches
+        a feeder's investors was not asked, so that position still assumes nothing.</p>
+      <p><b>Ancient Crunch now records both of its rounds.</b> The May 2026 convertible note,
+        and the priced round that followed about two months later at a $245M pre-money
+        valuation &mdash; a 2.2x markup on paper, with roughly 10% dilution and pro rata
+        offered on a handshake rather than a contract.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.26 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>Ancient Crunch</h4>
+      <p>The twenty-second deal card. MASA, Vandy and the popcorn brand, all under one
+        parent, so <b>any of those names now resolves</b> to the same position. Scored 86 of
+        100 by the Growth Circle underwrite &mdash; the strongest exit potential of anything
+        on file, at 9.5, against the weakest market score, at 7.5.</p>
+      <p><b>Two rounds sit in this record and they are not the same investment.</b> The card
+        carries the terms of the May 2026 convertible note: a $100M cap, a 20% discount, 8%
+        accruing interest and 2x your money ahead of everyone else if the company sells while
+        the note is still debt. A priced round followed about two months later at a higher
+        valuation, and <b>none of those protections apply to it</b>. Check which one you hold
+        before reading any number on the card.</p>
+      <p><b>The 8% is not a preferred return and the tool will not let it become one.</b> It
+        does not pay in cash; it accrues and turns into more equity. Typed into the preferred
+        return column it would have invented years of income that never arrives and repriced
+        a venture bet as an income sleeve. A venture position can no longer carry a preferred
+        return at all.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.25 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>A new deal shows up straight away</h4>
+      <p>Playhouse MD was published and stayed invisible. The deal files are served with a
+        ten-minute cache, and the page asked for them without saying which version it
+        wanted &mdash; so a browser handed back <b>yesterday's deal list against today's
+        app</b>, and there was no way to tell that from a deal simply not being written
+        yet. Kristin hit the same confusion from the other side, reporting the Ancient
+        Crunch card as having disappeared when it had never been there.</p>
+      <p>Deal data now carries the app version, so a release refreshes it once and the cache
+        keeps working in between. <b>If a deal you expect is missing, it is missing</b>,
+        which is the only useful answer.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.24 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>A preferred return is earned on money the fund has actually called</h4>
+      <p><b>Kristin Westergard found this one.</b> She asked whether the tool pays the
+        headline rate on your whole commitment while most of it is still uncalled. It did.
+        For a position you have funded in full this changes nothing and always did. For one
+        still being drawn down it was the most generous of every possible reading.</p>
+      <p>On the example book that is Asilia GC Fund &mdash; $100,000 committed against
+        $19,000 funded &mdash; and it was worth <b>$9,720</b> of preferred return that had
+        not been earned yet. The preferred return now accrues on capital as it is called,
+        ramping over the call schedule. <b>Exit proceeds are unchanged</b> and still run off
+        the full commitment, because the whole commitment is called long before any exit
+        lands.</p>
+      <p><b>What a fund pays you on the uncalled balance is a separate term</b>, and it
+        defaults to nothing. Some funds pay a small yield on committed-but-uncalled money so
+        it is not sitting idle. That is not the headline rate and the two must never be
+        added together by accident. Asilia is documented as paying something; the rate is
+        not settled, so the tool pays zero there until it is, which understates the position
+        on purpose.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.23 &nbsp;&middot;&nbsp; 28 Sep 2026</span>
+      <h4>When things pay, and what else is out there</h4>
+      <p><b>A maturity and liquidity ladder.</b> One row per position, one block per year it
+        pays, shaded darker where a bigger share of that position lands. A deal bought once
+        is a single block; a fund that sells down over several years appears in each of
+        them, which is the thing the tables could never show you. The thin gold line under a
+        row is its preferred return, which arrives on a schedule rather than on an exit.</p>
+      <p>It is deliberately <b>not</b> a range. Everything else on that tab ranks thousands
+        of simulated futures; the ladder is the schedule the deals&rsquo; own terms imply, so
+        it answers when a position is due rather than how likely it is to pay.</p>
+      <p><b>The three books side by side.</b> Venture, the income sleeves and the blended
+        book, each drawn from a bad run to a good one with the typical run marked, as a
+        multiple on capital committed so books of different sizes read against each other.</p>
+      <p><b>A fourth tab, Loaded GC Deals.</b> Every deal the tool already knows, in
+        alphabetical order, with its sponsor, terms and what to watch. Twenty are documented
+        and most books hold a handful, so most of this was invisible to any one reader.
+        Open any deal and it lists <b>every name it answers to</b> &mdash; which is the
+        answer to &ldquo;why is my position not filling in its terms&rdquo;.</p>
+      <p>The lifetime returns table now sits under the cone of outcomes, where it reads as
+        the cone&rsquo;s own numbers rather than as a separate claim.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.22 &nbsp;&middot;&nbsp; 27 Sep 2026</span>
+      <h4>It knows what you call your deals now</h4>
+      <p>Nobody writes the legal name of a fund in their own spreadsheet. <b>Eephus I, Plan A,
+        Asilia GC, SSF, Philo, Telly, Turbo, Bluebird, Rainmaker</b> and a few dozen other
+        spellings now resolve to the right deal, so the terms fill in without you having to
+        match someone else’s wording.</p>
+      <p><b>What has NOT changed is the refusal to guess.</b> &ldquo;Eephus&rdquo; on its own
+        is genuinely ambiguous between Fund I and Fund II, and &ldquo;Asilia&rdquo; between
+        three different vehicles. Those still resolve to nothing, and a test asserts they
+        always will, because attaching one deal’s terms to another deal’s money is
+        far worse than filling in nothing. A stray alias was also removed while doing this:
+        the Asilia Debt Fund had been given &ldquo;Asilia GC Fund (first offering)&rdquo; as an
+        alternative name, which is not what it was called and would have made
+        &ldquo;Asilia GC&rdquo; ambiguous.</p>
+      <p><b>And when a position cannot be placed, the page now says so.</b> It used to go
+        quiet: the row still ran on whatever you typed, which is the right behaviour, but
+        nothing on screen told you its terms had come from nowhere. Two different messages,
+        because they have different fixes. If the name could mean more than one deal you are
+        told which ones, so writing the fuller name is a one-word repair. If it is simply not
+        in the shared files you are told once, along with the note that this is normal
+        &mdash; most books hold things this tool has never been shown.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.21 &nbsp;&middot;&nbsp; 27 Sep 2026</span>
+      <h4>Pressing the demo button stopped telling you your tracker was out of date</h4>
+      <p><b>Run the example book and the page would report it as an older tracker.</b> It was
+        wrong every time, and about the file this page itself ships.</p>
+      <p>The cause was mundane. The age check reads which columns a sheet has, and the demo
+        button does not parse a sheet, so there were no columns to read and the check saw
+        nothing. It now reads the same signal from the data it was handed. <b>The check itself
+        is unchanged for real uploads</b> &mdash; a tracker that genuinely predates the optional
+        columns is still told so, and a test asserts that, because silencing the warning would
+        have been a worse bug than the one being fixed.</p>
+      <p>The example book is also regenerated from the shipped tracker and now carries every
+        column that tracker has, including the ones left blank. A column that exists and is
+        empty is not the same as a column that is missing, and treating them alike is what let
+        the file claim to be older than the sheet it comes from.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.20 &nbsp;&middot;&nbsp; 27 Sep 2026</span>
+      <h4>The break-even year is on the cone now</h4>
+      <p><b>A member reported the break-even note missing from her chart. It was not missing</b>
+        &mdash; it was in the sentence underneath, which said the year plainly. But she looked
+        at the chart, found no year on it, and drew the obvious conclusion. That is a fair
+        reading of a chart, and a good enough reason to move the information.</p>
+      <p>The cone now carries a dot where the typical future crosses the money-back line, with
+        the year beneath it. It is the same year the sentence below states, worked out the same
+        way, and a test asserts the two can never disagree &mdash; a chart and a caption showing
+        different years would be worse than neither showing one. The dot is placed at the true
+        crossing rather than at the nearest year tick, so it sits on the line where it belongs.</p>
+      <p>If your typical future never gets back above the line inside the calendar, nothing is
+        marked and the sentence says so outright.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.19 &nbsp;&middot;&nbsp; 26 Sep 2026</span>
+      <h4>How long you wait, shown next to what you get</h4>
+      <p><b>The hold now sits beside every return figure</b>, commitment-weighted for the
+        sleeves. It matters more than it sounds, because a multiple and a yearly rate rank the
+        same deals differently: <b>Next Life Sciences at 14.2x comes out below Rorra at
+        4.3x</b>, purely because one takes eight years and the other four. With both columns on
+        the same row you can read that straight across.</p>
+      <p>On the example book the sleeves are <b>6.7 years for income against 9.1 for
+        venture</b>, which is most of why their rates look so far apart. The returns panel now
+        says how much of the gap that accounts for: shortening venture to a five-year hold
+        would lift it from 7.2% to 13.8% a year, and its good run from 15% to 45%. <b>What the
+        hold does not explain is the middle</b> &mdash; the typical single venture deal returns
+        exactly your money back, and 1.0x is 0% a year whether it takes four years or
+        twenty.</p>
+      <p><b>A scatter chart of the same idea was tried and withdrawn on the same day.</b> It
+        asked a reader to hold two axes, a log scale and a bubble size in their head at once,
+        and the two columns say it better. No number changed either way; it was only ever a way
+        of drawing figures the tool already had.</p>
+      <p>Thanks to the member who asked whether the timeframe needed normalising. It does not
+        &mdash; a yearly rate already divides by the years &mdash; but the question was worth
+        measuring rather than answering from theory.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.17 &nbsp;&middot;&nbsp; 26 Sep 2026</span>
+      <h4>A preferred return is no longer a certainty</h4>
+      <p><b>Until now the model paid every preferred return in full, in every single one of the
+        6,000 simulated futures.</b> That was the most optimistic assumption in the tool and it
+        made the income sleeves look steadier than they are. A member asked whether the bad
+        scenarios should not also pay less, which is the right question.</p>
+      <p><b>How much arrives now depends on how the deal turned out</b> &mdash; and on the
+        <i>same</i> draw as the exit, not a separate one. That detail is the whole point: the
+        fund that hands back less than plan is the same fund that stopped paying its coupon.
+        Drawing the two independently would have let a position lose its entire equity while
+        still paying seven years of preferred return, which does not happen. A position that
+        writes off its equity pays about a quarter of its scheduled preferred return; one well
+        below plan pays about 70%; one near plan about 90%.</p>
+      <p><b>What it does to the example book.</b> The documents promise <b>$231,000</b> of
+        preferred return. The typical future now collects <b>$197,400</b>, and a bad run
+        collects <b>$166,200</b>. The income sleeve&rsquo;s typical yearly return falls from
+        19.6% to <b>18.1%</b> and the whole book from 12.4% to <b>11.8%</b>. <b>Venture does not
+        move at all</b>, because it pays no preferred return &mdash; which is a useful check
+        that the change did what it was meant to and nothing else.</p>
+      <p><b>The gap between income and venture narrowed but did not close</b>, and that is worth
+        knowing: the gap was never mostly about this. It is mostly that money back sooner is
+        worth more to a yearly rate, and that a single venture deal carries a 30% chance of
+        returning nothing against 5% for an income sleeve. There is now an explanation of that
+        on the returns panel, because it is the first question the table invites.</p>
+      <p>The shares are judgements rather than findings, and they sit in one place in the code
+        so they can be argued with. Thanks to the member who pushed on this one.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.16 &nbsp;&middot;&nbsp; 26 Sep 2026</span>
+      <h4>IRR, and a column for what you think a position is worth now</h4>
+      <p><b>There is an IRR panel on Liquidity Outlook</b> &mdash; by deal, by asset class, and
+        across the whole book. Two things about it are worth knowing before you read it.</p>
+      <p><b>It counts cash, not marks.</b> Every dollar in it is money actually returned, so it
+        will read LOWER than an IRR a sponsor reports, because theirs includes unrealised
+        carrying value. That gap is the difference between the two methods, not an error in
+        either.</p>
+      <p><b>A portfolio IRR is not the average of its deals&rsquo; IRRs.</b> IRR is not additive.
+        The panel pools every position&rsquo;s cash flow, solves once per simulated future, and
+        ranks the futures after that. On the example book, averaging the thirteen deals instead
+        gives a median of <b>&minus;5.4%</b> against the correct <b>12.4%</b> &mdash; which is
+        the difference between a healthy book and a loss-making one, so it is worth saying out
+        loud.</p>
+      <p><b>The most useful number turned out to be one nobody asked for.</b> Every single
+        venture SPV in the example book has a roughly 30% chance of returning nothing and a
+        median IRR of 0.0%. Pooled as a sleeve, the same eight positions have a median of 7.2%
+        and a P10 of &minus;0.8%. Nothing about any deal changed, only that there are eight of
+        them.</p>
+      <p><b>A sponsor&rsquo;s multiple is now shown as its own IRR.</b> The outcome table puts a
+        sponsor&rsquo;s figure in the top 10% of outcomes only, so at the median and even at a
+        good run it was invisible: four deals with sponsor multiples between 5.5x and 14.2x were
+        printing an identical number. The sponsor case now sits beside the model&rsquo;s own
+        percentiles so the two can be compared directly.</p>
+      <p><b>New optional column: Marked Up MOIC.</b> If you track valuation increases &mdash;
+        your position doubling when a round reprices &mdash; you can record it. It drives a paper
+        track shown <i>beside</i> the cash forecast and never inside it: it moves no cash figure,
+        and it never enters the IRR. Blank means nothing changes, and a tracker from before this
+        version produces identical numbers to the ones it produced yesterday.</p>
+      <p>Thanks to <b>Rick Strauss</b> for asking for IRR by investment, asset class and
+        scenario, and to <b>John Millen</b> for the markup argument &mdash; his reason for
+        tracking paper gains was better than the reason for ignoring them.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.15 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>Three Asilia vehicles, untangled &mdash; and a six-year error on Rorra</h4>
+      <p><b>There are three Asilia funds and the tool had been conflating them.</b> Sorted:</p>
+      <ul>
+        <li><b>Asilia Debt Fund</b> &mdash; the 2025 offering. A separate fund.</li>
+        <li><b>Asilia Credit Fund Evergreen (Fund II)</b> &mdash; direct senior-secured credit.
+          <b>$400,000 minimum</b>, 15%+ net paid quarterly, 1% on invested capital and 20% over a
+          6% preferred, five-year lockup then 90 days&rsquo; notice.</li>
+        <li><b>Asilia GC Fund</b> &mdash; the fund-of-funds wrapper at a <b>$100,000 minimum</b>
+          that gives GC members access. ACFE is one of its three sleeves.</li>
+      </ul>
+      <p><b>If you hold ACFE directly you should not be paying the fund-of-funds overlay.</b>
+        Direct is 1% and 20%. Inside the GC Fund the underlying is 0.5/20 with a 0.5/10 overlay on
+        top &mdash; 1.0/30 all-in. Different route, different fee.</p>
+      <p><b>Rorra was carrying a ten-year hold that came from no document at all.</b> The
+        underwrite says three to five years. That moved its exit from 2036 to <b>2030</b>. A wrong
+        timeline is worse than a wrong multiple &mdash; it puts the cash in the wrong decade. If
+        you hold Rorra, reload: your calendar just changed shape.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.14 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>A multiple nobody gave you no longer looks like one somebody did</h4>
+      <p><b>If a venture deal has no multiple and no preferred return, this tool falls back to 5.0x.</b> It
+        always has. What it never did was tell you &mdash; so a number the tool invented sat on the
+        card looking exactly like a sponsor&rsquo;s projection. <b>5.0x is not a neutral
+        assumption, it is a strong claim.</b> The card now says when the figure was assumed, and
+        invites you to put your own in.</p>
+      <p><b>Rainmaker is the deal that surfaced it.</b> Its documents and the underwriting call
+        produce <i>no base case at all</i> &mdash; it is sold on multiple expansion rather than a
+        projected multiple. So everyone loading it got a confident 5.0x that nobody had ever said.
+        Its card now carries what the documents actually say: a bare SAFE at a $450M post-money
+        cap, about 10x forward revenue, roughly a 28% premium to the Series B, no preference and
+        no rights, a $10,000 minimum, and SPV fees front-loaded at around 8&ndash;10% in year one.
+        It is marked provisional, because the terms come from the underwriting call rather than
+        from an executed SAFE.</p>
+      <p>If you hold something with no sponsor multiple, this is your prompt to put a number in.
+        Yours always wins.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.13 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>SpaceStation from its Partnership Agreement, and cards that show what a fund holds</h4>
+      <p><b>A fund card used to describe the wrapper and say nothing about what is inside it.</b>
+        Where a sponsor publishes its portfolio, the card now lists it &mdash; company names, stage
+        and a line on each. SpaceStation is the first: eleven companies so far, against a target
+        final portfolio in the mid-to-high 30s.</p>
+      <p><b>SpaceStation terms are now from the Partnership Agreement</b> rather than from
+        memory. Ten-year term from final closing, extendable by two one-year periods, with a
+        five-year investment period. <b>2% management fee on your committed capital</b> &mdash;
+        note that is a different basis from Eephus, where the 2% is charged on the properties'
+        income. 20% carried interest. Capital is called over roughly three and a half years, in
+        tranches as deals get done rather than on a fixed schedule.</p>
+      <p>The deal count moved from an estimated 40 to <b>37</b>, from the sponsor's own stated
+        target. Either way it is well above the 20-deal line, so it is priced as a fund.</p>
+      <p><b>BlueBird:</b> the preferred return is confirmed with the GP as <b>paid annually</b>.
+        The PPM reserves the timing to the GP's discretion, so that confirmation is worth having
+        written down.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.12 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>BlueBird rebuilt from its PPM, and what it actually is</h4>
+      <p><b>Every number was already right</b>, which is worth saying: 15% preferred, a
+        7-year term, a 2.65x target, 2% management fee, $100k minimum. The documents
+        confirmed the card rather than correcting it.</p>
+      <p><b>The description of the deal was wrong, though.</b> The card said &ldquo;a single
+        operating company, not a pool&rdquo;. It is a <b>roll-up</b>: it buys several small
+        gutter and roofing businesses across multiple markets, combines them into one
+        operation, and sells that platform to a private equity or strategic buyer. It buys
+        many and sells one &mdash; which is still why it is modelled as a single exit rather
+        than a fund selling down, but for a different reason than the card gave.</p>
+      <p><b>The waterfall is now written out in full, and it is worth reading.</b> 15%
+        preferred first, then 100% of your capital back, then carried interest of <b>90% to
+        the GP and 10% to you</b>. The sponsor takes nothing until your capital and the whole
+        accrued preferred are paid, which is investor-friendly &mdash; but above that line the
+        split is heavily theirs, so a realistic outcome sits close to capital plus preferred.
+        Read the 2.65x target with that in mind.</p>
+      <p>Fund term is 7 years, extendable by the GP for two further one-year periods.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.11 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>Both Eephus funds rebuilt from their PPMs, and the class ladders are real now</h4>
+      <p>The documents arrived, so the guessing stops. <b>Your Eephus class is set by how much
+        you invested</b>, exactly as was suspected, and the tool now works it out from your
+        commitment and applies the right preferred rate by itself.</p>
+      <p><b>Fund I</b> &mdash; $50k buys Class A-4 at <b>6%</b>, $100k gets A-3 at <b>7%</b>,
+        $250k gets A-2 at <b>8%</b>, $500k gets A-1 at <b>8%</b>.</p>
+      <p><b>Fund II is not the same ladder</b>, which is worth knowing if you are in both. It
+        has five classes and pays more at the top: $50k is A-5 at <b>6%</b>, $100k is A-4 at
+        <b>7%</b>, $250k is A-3 at <b>8%</b>, $500k is A-2 at <b>8%</b>, and $1M is A-1 at
+        <b>9%</b>.</p>
+      <p>Both accrue <b>non-compounding</b> on your unreturned capital, and start from the
+        later of the date you fund or the date the fund deploys your money &mdash; so the
+        clock can begin after your cash goes in.</p>
+      <p>Also corrected: the management fee is <b>2% of the income the properties generate</b>,
+        not 2% of your committed capital. Those are very different things and the card said
+        the wrong one. Carry on Fund I is 30% to the sponsor after the preferred, then a 20%
+        ARR hurdle, then 50/50; Fund II runs a 30% catch-up, then 70/30 to a 15% IRR, then
+        50/50.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.10 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>Your fee class is now worked out from your commitment</h4>
+      <p>Yesterday this tool noticed that several GC deals price by ticket size, and then
+        printed a message telling you to go and work out your own share class and type the
+        number in. That was the tool asking you to do its job. It already knows what you
+        committed and it already holds the bands.</p>
+      <p><b>Asilia now resolves automatically.</b> Under $400k you are Class B at 1.3% and
+        30% carry; at $400k and above you are Class A at 1.2% and 20%. The card says which
+        one you are in and that it came from your own commitment.</p>
+      <p><b>Eephus deliberately does not.</b> Its documents give the rate per share class
+        &mdash; 8% for A-1 and A-2, 7% for A-3, 6% for A-4 &mdash; but never say what
+        <i>sets</i> the class. Guessing a ticket-size breakpoint would be worse than
+        admitting there is one, so the card still asks you. <b>If you know the breakpoints,
+        send them over</b> and Eephus will resolve automatically too.</p>
+      <p>Anything you type still wins. A tier only ever fills a cell you left blank.</p>
+      <p><b>Also:</b> the earlier Asilia offering is now called <b>Asilia (first
+        offering)</b> rather than Asilia GC Fund (first offering). The old spelling still
+        matches, so nothing breaks.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.9 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>Two Asilia offerings, and terms that are not the same for everyone</h4>
+      <p><b>The Asilia GC Fund was raised twice, on different terms, and the tool was
+        treating them as one deal.</b> The earlier offering has a <b>3.27x</b> base case with
+        the equity kickers realised over <b>years 5 to 8</b>. The later one has a
+        <b>5.27x</b> base case over <b>years 6 to 8</b>. They now have a file each. If you
+        hold the later one, nothing changes &mdash; keep calling it <b>Asilia GC Fund</b>. If
+        you hold the earlier one, name it <b>Asilia GC Fund (first offering)</b>.</p>
+      <p><b>A deal card now warns you when a term is not the same for every investor.</b>
+        Eephus pays <b>8%</b> to Class A-1 and A-2, 7% to A-3 and <b>6%</b> to A-4, and the
+        shared file carries 6% &mdash; the lowest tier. Asilia charges 1.3% and 30% carry
+        below $400k and 1.2% and 20% above it, and the file carries the below-$400k class. In
+        both cases the tiering was written down in the file all along and nothing put it on
+        screen. Check your own class and type your figure in; what you type wins.</p>
+      <p><b>Cards also print the footnotes the terms were already carrying</b> &mdash; which
+        share class a rate refers to, what a hold actually means, whether a preferred return compounds.
+        That text existed since the files were written and had never been displayed.</p>
+      <p><b>Said out loud on the Background tab:</b> management fees and carry are shown on a
+        card but are <b>not modelled</b>. The model runs on the sponsor&rsquo;s quoted
+        multiple, which is already net to the investor, so charging fees again would count
+        them twice. If you are in a cheaper fee class than the one the file records, you are
+        keeping more than the tool shows.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.8 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>Three reading bugs, found by pointing a new test suite at the spreadsheet</h4>
+      <p>None of these could be seen on screen. The page rendered normally in every case,
+        which is what made them worth finding.</p>
+      <p><b>A percentage typed as text was read as a whole number.</b> If your preferred return cell
+        contained the text <code>8%</code> rather than a number formatted as a percentage,
+        it was read as <b>8</b> &mdash; a preferred return of 800% a year. Excel usually
+        hides this, because a percent-formatted cell really holds 0.08. A <b>CSV does
+        not</b>: export that same cell and it is written out as the text &ldquo;8%&rdquo;.
+        That is the route anyone on a Mac was told to take, so this only ever hit the people
+        least able to spot it. If your book showed absurd income, this was why. Reload and
+        drop your file again.</p>
+      <p><b>A column headed &ldquo;Type&rdquo; lost its asset class.</b> When the Fund /
+        Single deal column arrived in v1.5 it claimed &ldquo;Type&rdquo; as one of its
+        names, and took it off the asset-class column, which had used it since the
+        beginning. Trackers predating v1.5 were the ones affected &mdash; the people who had
+        been using the tool longest.</p>
+      <p><b>A column headed &ldquo;Funded year&rdquo; was read as an amount.</b> It starts
+        with the word &ldquo;funded&rdquo;, so it was matched to funded-to-date: a year of
+        2026 became $2,026 paid in, and the position then showed an uncalled balance that
+        did not exist.</p>
+      <p><b>Also:</b> the tracker now carries its own version number, separate from the
+        app&rsquo;s. They were the same number, so a release that changed no columns was
+        telling people to go and find a stamp that did not exist in the file they already
+        had. Your tracker is current at <b>v1.6</b>; you do not need a new one.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.7 &nbsp;&middot;&nbsp; 25 Sep 2026</span>
+      <h4>The cone of outcomes, and a card that says what you typed over</h4>
+      <p><b>A new chart under the cumulative table on Liquidity Outlook.</b> That table is
+        exact and unreadable at a glance &mdash; seventeen rows of three columns &mdash; and
+        the thing worth taking from it is a shape: how fast the gap between a bad future and
+        a good one opens up. The shaded band runs from the 10th to the 90th percentile with
+        the median through it, there is a dashed line at the capital you committed, and the
+        year each edge crosses that line is stated in words underneath. It is drawn from the
+        same rows the table prints, so the two cannot disagree.</p>
+      <p><b>A deal card now says which figures you typed over the shared file.</b> Your value
+        is still the one that runs, and that has not changed. What has changed is that the
+        disagreement is visible. A number you chose on purpose and a number that went stale
+        when a sponsor&rsquo;s terms were corrected used to look exactly alike &mdash; which
+        is how a 5-to-8 payout window sat under a deal whose documents say 6 to 8 for a day.
+        Both figures now print, yours first.</p>
+    </div>
+    <div class="rel">
+      <span class="tag">v1.6 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Asilia, rebuilt from the actual offering documents</h4>
+      <p>The shared Asilia terms have been replaced from the April 2026 presentation, the
+        Growth Circle refreshed analysis, the underwrite and the Q&amp;A notes. The base case
+        is 5.27x over 8 years, not the 3.27x that was here. The fund runs 5 years of
+        deployment then a 3-year harvest with no extension, so the equity kickers land in
+        years 6 to 8 rather than 5 to 8. Fees are 1.3% and 30% carry under $400k, 1.2% and
+        20% above it.</p>
+
+      <h4>Asilia Credit Fund Evergreen is its own file now</h4>
+      <p>A holder pointed out that ACFE and the Asilia GC Fund were being run together. They
+        are different vehicles. ACFE is the conservative sleeve on its own: senior secured
+        lending, evergreen, no wind-down and no exit multiple to quote. The GC Fund is the
+        three-sleeve wrapper that holds it alongside Walnut and Opportunistic. If you hold
+        the standalone, use the ACFE file.</p>
+
+      <h4>An ambiguous name now matches nothing</h4>
+      <p>Typing just &ldquo;Asilia&rdquo; used to attach whichever file had the longer name.
+        Two vehicles start with that word, so the tool would have picked one and looked
+        confident about it. When more than one deal could match, none is used and you supply
+        your own terms. Writing the fuller name resolves it.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.5 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Just say whether it is a fund</h4>
+      <p>There is a new column in the tracker called <b>Fund or Single deal</b>. Type one or the
+        other and the tool stops guessing. A fund sells down over several years; a single company
+        or property is bought on one date, and that difference changes when your money shows up.</p>
+      <p>It was possible to express this before by counting the deals inside a fund, which was an
+        indirect way to ask a question you already know the answer to. The count still matters for
+        one thing only: a venture fund of 20 or more is priced differently from one company.</p>
+
+      <h4>Asilia&rsquo;s shared terms are being checked</h4>
+      <p>A holder pointed out that the terms in the shared Asilia file came from the first
+        offering and do not match the current one, and that Asilia Credit Evergreen Fund is a
+        separate vehicle with one sleeve, no exit and a high-teens annual return. Her documents,
+        not mine. The card now says so rather than presenting terms that may be wrong.</p>
+      <p>This is exactly what shared files are supposed to do: put the terms where enough people
+        can see them that somebody spots the error. If a shared file disagrees with your own
+        paperwork, <b>type over it</b>. Your numbers always win.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.4 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Bug sweep</h4>
+      <p>The new version went up fast, so it has been put through a full test pass. Two real
+        problems turned up and both are fixed.</p>
+      <p><b>A short deal name could pick up the wrong terms.</b> A position named with just a
+        couple of letters would quietly match a shared deal file that happened to start the
+        same way, and inherit its sponsor, hold and multiple without saying so. A partial
+        match now needs a proper amount of the name to agree. An exact name still matches at
+        any length.</p>
+      <p><b>An apostrophe or a quotation mark in a deal name broke its card.</b> The card
+        would not open, and any angle brackets in the name were treated as formatting. Names
+        with punctuation now work normally.</p>
+      <p>Neither changed any number in anyone&rsquo;s results. If you find anything else,
+        please say so.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.3 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Same link, bigger tool &mdash; and it opens somewhere new</h4>
+      <p>If you bookmarked this as the Exit Timing Calendar, nothing is lost and the link is
+        unchanged. The calendar is now the <b>Liquidity Outlook</b> tab, and there are two more
+        tabs beside it. The page opens on the new one, so this is the change you are noticing.</p>
+
+      <h4>Private Deal Dashboard</h4>
+      <p>Everything you hold in one place: committed, funded, still callable, allocation, and a
+        card per deal you can open for its terms. At the top, two multiples side by side &mdash;
+        what the sponsors project, and what the same deals are <b>expected</b> to return once the
+        outcomes that go nowhere are weighted in. Most tools show you only the first.</p>
+      <p>There is also a year-by-year table of capital calls going out against preferred income
+        coming in. Exits are deliberately not on it: a preferred return is promised and an exit is hoped
+        for, and adding them together is the most misleading thing one of these tools can do.
+        Exits stay on the Liquidity Outlook tab.</p>
+
+      <h4>You can leave most of the tracker blank now</h4>
+      <p>The tool ships with a small shared file for each of the common GC deals, carrying the
+        sponsor, the vehicle, the structure, the preferred rate, the hold, the fees and when the
+        sponsor says it pays out. If your deal name matches one, all of that fills itself in and
+        you only supply <b>your</b> numbers: what you committed, what you have funded, and when.</p>
+      <p><b>Anything you type wins over the shared file.</b> It only fills what you left empty and
+        never argues with you. A deal nobody has shared still works exactly as before.</p>
+      <p>Nothing personal is in a shared file. There is a new <b>Thesis</b> column for why you did
+        the deal, and that stays in your spreadsheet, on your machine, like everything else.</p>
+
+      <h4>Background</h4>
+      <p>The assumptions, the rules the tool enforces, and a plain list of what it
+        <b>cannot</b> tell you. Worth two minutes before you trust any of the numbers.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.2 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Funds no longer need you to count their deals</h4>
+      <p>In v1.1 a fund only paid out over several years if you told it how many
+        investments it held. That was the wrong question. Whether a fund sells down over
+        time has nothing to do with how many things are in it &mdash; it is simply what
+        funds do.</p>
+      <p>So anything paying a preferred return or a preferred return is now treated as a fund
+        automatically, and pays out over a window, with nothing to fill in. If you hold a
+        <b>single company</b> that pays a preferred return, put <b>1</b> in the Deals in
+        fund column and it will exit on one date instead, the way a company being bought
+        actually happens.</p>
+
+      <h4>You can tell it what your sponsor told you</h4>
+      <p>There are two new optional columns, <b>Liquidity from</b> and <b>Liquidity to</b>,
+        counted in years from when you funded the deal. If a sponsor has said
+        &ldquo;expect distributions in years five through eight&rdquo;, put 5 and 8 in
+        those columns and that is exactly what the tool will use.</p>
+      <p>Leave them blank and it assumes the sell-down runs over the back 40% of the hold,
+        which is roughly what most sponsors describe anyway. Worth knowing: a fund&rsquo;s
+        pay-out window and its stated life are not the same thing. A property fund can
+        finish selling in year six and formally wind up in year seven.</p>
+      <p>The deal count still matters for one thing only: a venture fund holding 20 or more
+        companies is priced differently from a single company. That has not changed.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.1 &nbsp;&middot;&nbsp; 24 Sep 2026</span>
+      <h4>Funds are no longer treated like single deals</h4>
+      <p>A fund that holds twenty or thirty companies behaves nothing like a single
+        company, and the first version priced them the same way. The old maths gave every
+        venture position a 30% chance of returning nothing. For one company that is fair.
+        For a fund of twenty it would take every company in it failing at once, which has
+        never happened to a real fund.</p>
+      <p>Funds now use their own set of odds, taken from what venture funds have actually
+        returned rather than from anything invented here. A useful side effect: it puts the
+        sponsor&rsquo;s own target multiple at roughly the top 5% of outcomes, which is
+        where a target belongs. Something to aim at, not the expected result.</p>
+
+      <h4>Funds pay out over several years, not all on one day</h4>
+      <p>A fund sells its holdings gradually, so the cash arrives over a stretch of years.
+        The tool used to drop the whole lot into a single year, which for something meant
+        to be a calendar was the bigger mistake of the two. Anything holding more than one
+        deal now spreads its payout across the years around its exit.</p>
+      <p>This moves no money. It only puts it in the right years, and your lifetime totals
+        come out exactly the same either way.</p>
+
+      <h4>What you need to do</h4>
+      <p>There is a new column in the tracker called <b>Deals in fund</b>. Put 1 there, or
+        leave it empty, and nothing changes from before. Put the real number in and your
+        funds stop being priced like single companies. If you are not sure how many the
+        fund holds, ask the sponsor.</p>
+      <p>A single company being bought is still one event on one date, so leave those at 1.</p>
+    </div>
+
+    <div class="rel">
+      <span class="tag">v1.0 &nbsp;&middot;&nbsp; 22 Sep 2026</span>
+      <h4>First public release</h4>
+      <p>Drop in a tracker and get a year-by-year picture of when cash might arrive, how
+        much has arrived by any given year, what the whole book returns over its life, and
+        the shape of the distribution behind all of it.</p>
+    </div>
+
+    <div class="close">
+      <button type="button" id="relClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="engine.js"></script>
+<!-- THE FORK POINT, and the only place the two apps differ. runway.js and runway-ui.js load
+     BEFORE app.js because the tab registers itself on window.APP_PLUGINS, which app.js reads
+     once as it builds its tab list. Load them after and the tab silently never appears. -->
+<script src="history.js"></script>
+<script src="runway.js"></script>
+<script src="portfolio.js"></script>
+<script src="runway-ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

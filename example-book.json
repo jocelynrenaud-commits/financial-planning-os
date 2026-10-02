@@ -1,0 +1,70 @@
+[
+  {
+    "name": "Harbourline Ventures Fund II",
+    "sleeve": "Venture",
+    "commitment": 150000,
+    "funded": 90000,
+    "yearFunded": 2024,
+    "conviction": "High",
+    "thesis": "The only properly diversified venture exposure in the book."
+  },
+  {
+    "name": "Northwind Robotics",
+    "sleeve": "Venture",
+    "commitment": 25000,
+    "funded": 25000,
+    "yearFunded": 2025,
+    "conviction": "Medium",
+    "thesis": "A single bet, sized like one."
+  },
+  {
+    "name": "Cedar Mill Credit Fund",
+    "sleeve": "Income",
+    "commitment": 200000,
+    "funded": 120000,
+    "yearFunded": 2025,
+    "conviction": "High",
+    "nextCallDate": "Q2 2027",
+    "nextCallAmount": 40000,
+    "thesis": "The income floor. Quarterly cash while everything else waits."
+  },
+  {
+    "name": "Stonebrook Industrial Fund III",
+    "sleeve": "Income",
+    "commitment": 100000,
+    "funded": 100000,
+    "yearFunded": 2024,
+    "conviction": "Medium",
+    "thesis": "Rent from long leases, which is about as close to a bond as property gets."
+  },
+  {
+    "name": "Halcyon Hospitality Partners",
+    "sleeve": "Income",
+    "commitment": 75000,
+    "funded": 75000,
+    "yearFunded": 2025,
+    "conviction": "Medium",
+    "thesis": "The one position whose whole return is in the sale."
+  },
+  {
+    "name": "Vantage Point Growth Partners",
+    "sleeve": "Income",
+    "commitment": 100000,
+    "funded": 60000,
+    "yearFunded": 2026,
+    "conviction": "High",
+    "nextCallDate": "2027",
+    "thesis": "A boring business bought cheaply, paying while it is held."
+  },
+  {
+    "name": "Kestrel Analytics",
+    "sleeve": "Venture",
+    "commitment": 10000,
+    "funded": 10000,
+    "yearFunded": 2026,
+    "conviction": "Low",
+    "hold": 7,
+    "moic": 12,
+    "thesis": "Not in the shared files, so it runs on what is typed here. That is the point."
+  }
+]
