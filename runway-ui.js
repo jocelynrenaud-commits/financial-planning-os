@@ -23,11 +23,16 @@
 
        birthYear   retirement "was fixed at 2032-01-01, age 62"
        spend       250,000 * 1.04^(62-55), W-2 replacement at the stated retirement age
-       floorSpend  THE SAME NUMBER on purpose. The stated objective is to "guarantee a
-                   $330K/yr income floor by age 62" and no separate essentials figure
-                   exists, so the target IS the floor. That makes the guardrail and
-                   floor-first modes inert on this profile, which is a true thing about
-                   the plan rather than a bug in the demo.
+       floorSpend  80% of the target, which is not an estimate: investorProfile
+                   .spendingGuardrails, status "ACCEPTED 2026-09-21", states "Floor set by
+                   operator at 80% of target". 0.80 x 328,983 = 263,186. The guardrail
+                   tiers below already match that same accepted analysis, 12x / 9x / 80%,
+                   so the app is not showing a policy he had rejected.
+
+                   His own sweep says this is the dial that matters: moving the trigger
+                   from 12x to 18x coverage changes the success rate by 0 to 1 points at
+                   every age, while raising the floor from 70% to 80% costs about 9 points
+                   at age 64 and 5 at 65. Only the FLOOR moves the answer.
        benefit     claimed at max(62, retirement age), because claiming at 62 while still
                    earning would have nearly all of it withheld.
 
@@ -43,7 +48,7 @@
     stopYear: 2032,
     planToAge: 92,
     spend: 328983,
-    floorSpend: 328983,
+    floorSpend: 263186,
     benefitAge: 62,
     benefitAnnual: 33264,
     sleeves: [
