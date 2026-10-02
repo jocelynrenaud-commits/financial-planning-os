@@ -14,13 +14,16 @@ the wifi off. Close the tab and it forgets you were here.
   with historical sampling drawn from 1928 to 2025
 - **Performance & Returns** — how much comes back, and the range around it
 - **Glossary & Background** — the assumptions, and what the tool cannot tell you
-- **Deal Library** — the deals it already knows, and the names each one answers to
+- **Loaded GC Deals** — the deals it already knows, and the names each one answers to
 
-## The demo data is fictional
+## The example book
 
-Every deal and every position shipped here is invented, including the sponsors. They exist so
-the app can be tried before you load your own numbers, and the terms were chosen to exercise
-the model rather than to describe any real offering. Each file says so on its own face.
+The demo runs on a real book of Growth Circle deals, with the terms those deals actually carry,
+so a member can check what they are looking at against their own statements rather than against
+invented names. Load your own spreadsheet and it replaces all of it.
+
+**Your tracker always wins.** A shared deal file only fills in what you left blank. If your copy
+of the terms differs from the shared one, yours is used and nothing argues with you.
 
 ## Not advice
 

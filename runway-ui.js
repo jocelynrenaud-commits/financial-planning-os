@@ -709,13 +709,6 @@
     if (rst) rst.onclick = () => { Object.keys(LIVE).forEach((k) => delete LIVE[k]); render(host, ctx); };
   }
 
-  /* "Loaded GC Deals" names a community this app does not belong to, and the deals it ships
-     are fictional. Set here rather than inline in index.html for a dull but important reason:
-     the test harness evaluates script FILES and not inline blocks, so an inline label would
-     ship untested and could differ between jsdom and a real browser. Same shape as
-     APP_PLUGINS, so app.js stays byte-identical in both apps. */
-  root.APP_TAB_LABELS = Object.assign({ universe: 'Deal Library' }, root.APP_TAB_LABELS || {});
-
   root.APP_PLUGINS = (root.APP_PLUGINS || []).concat([{
     id: 'runway',
     label: 'Retirement Simulator',

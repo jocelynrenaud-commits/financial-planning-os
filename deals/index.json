@@ -1,83 +1,332 @@
 {
-  "about": "Index of shareable deal files. The app matches a row in your tracker to one of these by name or alias and fills in the terms, so you only have to type your own numbers. A deal that is not listed still works; you just supply its terms yourself. EVERY DEAL IN THIS DEMO IS FICTIONAL.",
-  "asOf": "2026-10-01",
+  "about": "Index of shareable deal files. The app matches a row in your tracker to one of these by name or alias and fills in the terms, so you only have to type your own numbers. A deal that is not listed still works; you just supply its terms yourself.",
+  "asOf": "2026-09-30",
   "deals": [
     {
-      "slug": "northwind-robotics",
-      "name": "Northwind Robotics",
+      "slug": "aerolane",
+      "name": "Aerolane",
       "aliases": [
-        "Northwind Robotics",
-        "Northwind",
-        "Northwind Robotics, Inc."
+        "Aerolane",
+        "Edge Logistics",
+        "Edge Logistics, Inc.",
+        "Edge Logistics, Inc. d/b/a Aerolane"
       ],
       "assetClass": "VC",
       "vehicle": "SPV",
-      "sponsor": "Lantern Syndicate (SPV) · Northwind Robotics"
+      "sponsor": "Spacestation Investments · Edge Logistics, Inc. d/b/a Aerolane"
     },
     {
-      "slug": "harbourline-ventures-ii",
-      "name": "Harbourline Ventures Fund II",
+      "slug": "aerthlings",
+      "name": "AERTHLINGS",
       "aliases": [
-        "Harbourline Ventures Fund II",
-        "Harbourline II",
-        "Harbourline Ventures",
-        "HVF II"
+        "AERTHLINGS",
+        "ÆRTHLINGS",
+        "Earthlings",
+        "Modern Games",
+        "Modern Games (AERTHLINGS)"
       ],
       "assetClass": "VC",
-      "vehicle": "Fund",
-      "sponsor": "Harbourline Capital"
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV) · Modern Games"
     },
     {
-      "slug": "cedar-mill-credit",
-      "name": "Cedar Mill Credit Fund",
+      "slug": "amplifi-companies",
+      "name": "Amplifi Companies",
       "aliases": [
-        "Cedar Mill Credit Fund",
-        "Cedar Mill",
-        "Cedar Mill Credit",
-        "CMCF"
+        "Amplifi Companies",
+        "Amplifi",
+        "Amplifi Co",
+        "Amplifi Companies Inc"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SAFE",
+      "sponsor": "Amplifi Companies (Reg CF SAFE)"
+    },
+    {
+      "slug": "ancient-crunch",
+      "name": "Ancient Crunch",
+      "aliases": [
+        "Ancient Crunch",
+        "AncientCrunch",
+        "Ancient Crunch (MASA)",
+        "MASA",
+        "MASA Chips",
+        "Vandy",
+        "Vandy Crisps",
+        "Vandy Crunch",
+        "Perla",
+        "Perla Popcorn",
+        "Golden Age Popcorn"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV) — Ancient Crunch, Inc."
+    },
+    {
+      "slug": "asilia-credit-fund-evergreen",
+      "name": "Asilia Credit Fund Evergreen",
+      "aliases": [
+        "Asilia Credit Fund Evergreen",
+        "Asilia Credit Evergreen",
+        "Asilia Credit Evergreen Fund",
+        "Asilia Evergreen",
+        "ACFE",
+        "ACEF",
+        "ACF2"
+      ],
+      "assetClass": "Private Credit",
+      "vehicle": "Evergreen fund",
+      "sponsor": "Asilia Credit Investments"
+    },
+    {
+      "slug": "asilia-gc-fund",
+      "name": "Asilia GC Fund",
+      "aliases": [
+        "Asilia GC Fund",
+        "Asilia GC Fund, LP",
+        "Asilia GC Fund QP, LP",
+        "Asilia GC",
+        "Asilia Growth Circle Fund",
+        "Asilia Growth Circle",
+        "AGCF"
       ],
       "assetClass": "Private Credit",
       "vehicle": "Fund",
-      "sponsor": "Cedar Mill Partners"
+      "sponsor": "Asilia Credit Investments"
     },
     {
-      "slug": "stonebrook-industrial-iii",
-      "name": "Stonebrook Industrial Fund III",
+      "slug": "bluebird-capital",
+      "name": "BlueBird Capital",
       "aliases": [
-        "Stonebrook Industrial Fund III",
-        "Stonebrook III",
-        "Stonebrook Industrial",
-        "Stonebrook"
-      ],
-      "assetClass": "Real Estate",
-      "vehicle": "Fund",
-      "sponsor": "Stonebrook Real Assets"
-    },
-    {
-      "slug": "halcyon-hospitality",
-      "name": "Halcyon Hospitality Partners",
-      "aliases": [
-        "Halcyon Hospitality Partners",
-        "Halcyon Hospitality",
-        "Halcyon",
-        "Halcyon Partners"
-      ],
-      "assetClass": "Real Estate",
-      "vehicle": "Fund",
-      "sponsor": "Halcyon Asset Group"
-    },
-    {
-      "slug": "vantage-point-growth",
-      "name": "Vantage Point Growth Partners",
-      "aliases": [
-        "Vantage Point Growth Partners",
-        "Vantage Point",
-        "Vantage Point Growth",
-        "VPGP"
+        "BlueBird Capital",
+        "BlueBird Capital Group",
+        "BlueBird Capital Group, LP",
+        "BlueBird",
+        "BlueBird Capital (Tranche 1)",
+        "BlueBird Capital (Tranche 2)",
+        "BlueBird Tranche 1",
+        "BlueBird Tranche 2"
       ],
       "assetClass": "Private Equity",
       "vehicle": "SPV",
-      "sponsor": "Vantage Point Capital · Meridian Services Group"
+      "sponsor": "BlueBird Capital Group, LP"
+    },
+    {
+      "slug": "eephus-growth-fund-i",
+      "name": "Eephus Growth Fund I",
+      "aliases": [
+        "Eephus Growth Fund I",
+        "Eephus Growth Fund 1",
+        "Eephus Fund I",
+        "Eephus Fund 1",
+        "Eephus Growth I",
+        "Eephus I",
+        "Eephus 1",
+        "Eephus Growth Fund, LLC I"
+      ],
+      "assetClass": "Real Estate",
+      "vehicle": "Fund",
+      "sponsor": "Eephus Growth Fund, LLC"
+    },
+    {
+      "slug": "eephus-growth-fund-ii",
+      "name": "Eephus Growth Fund II",
+      "aliases": [
+        "Eephus Growth Fund II",
+        "Eephus Growth Fund 2",
+        "Eephus Fund II",
+        "Eephus Fund 2",
+        "Eephus Growth II",
+        "Eephus II",
+        "Eephus 2",
+        "Eephus Growth Fund, LLC II"
+      ],
+      "assetClass": "Real Estate",
+      "vehicle": "Fund",
+      "sponsor": "Eephus Growth Fund, LLC"
+    },
+    {
+      "slug": "freaks-of-nature",
+      "name": "Freaks of Nature",
+      "aliases": [
+        "Freaks of Nature",
+        "FoN",
+        "Freaks of Nature Skincare",
+        "Freaks of Nature Sunscreen"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Amplifi / GC SPV · Freaks of Nature"
+    },
+    {
+      "slug": "malbon",
+      "name": "Malbon",
+      "aliases": [
+        "Malbon",
+        "Malbon Golf",
+        "Malbon Golf Co"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Amplifi / GC SPV · Malbon Golf"
+    },
+    {
+      "slug": "next-life-sciences",
+      "name": "Next Life Sciences - Plan A",
+      "aliases": [
+        "Next Life Sciences - Plan A",
+        "Next Life Sciences",
+        "Next Life Science",
+        "Next Life Sciences Plan A",
+        "Next Life",
+        "NextLife",
+        "Plan A",
+        "NLS"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV) · NEXT Life Sciences"
+    },
+    {
+      "slug": "nooshee",
+      "name": "Nooshee",
+      "aliases": [
+        "Nooshee",
+        "Nooshée",
+        "Nooshee Inc"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Amplifi / GC SPV · Nooshee"
+    },
+    {
+      "slug": "philo-hospitality-fund-i",
+      "name": "Philo Hospitality Fund",
+      "aliases": [
+        "Philo Hospitality Fund",
+        "Philo Hospitality Fund I",
+        "Philo Hospitality Fund 1",
+        "Philo Hospitality",
+        "Philo Ventures",
+        "Philo Fund I",
+        "Philo"
+      ],
+      "assetClass": "Real Estate",
+      "vehicle": "Fund",
+      "sponsor": "Philo Ventures"
+    },
+    {
+      "slug": "playhouse-md",
+      "name": "Playhouse MD",
+      "aliases": [
+        "Playhouse MD",
+        "PlayhouseMD",
+        "Playhouse M.D.",
+        "Playhouse",
+        "Playhouse Medical"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV and fund) — Playhouse MD"
+    },
+    {
+      "slug": "rainmaker-spv",
+      "name": "Rainmaker SPV",
+      "aliases": [
+        "Rainmaker SPV",
+        "Rainmaker",
+        "Rainmaker Technology",
+        "Rainmaker Technology Corporation"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV) · Rainmaker Technology Corporation"
+    },
+    {
+      "slug": "rorra",
+      "name": "Rorra",
+      "aliases": [
+        "Rorra",
+        "Rorra Inc",
+        "Rorra Water"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments · Rorra"
+    },
+    {
+      "slug": "spacestation-fund",
+      "name": "SpaceStation Fund",
+      "aliases": [
+        "SpaceStation Fund",
+        "Space Station Fund",
+        "SpaceStation",
+        "Space Station",
+        "SPVC Ventures Fund I",
+        "SPVC Ventures Fund 1",
+        "SPVC",
+        "SSF"
+      ],
+      "assetClass": "VC",
+      "vehicle": "Fund",
+      "sponsor": "SPVC Ventures Fund I, L.P."
+    },
+    {
+      "slug": "stix",
+      "name": "STIX",
+      "aliases": [
+        "STIX",
+        "STIX Golf"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Amplifi / GC SPV · STIX"
+    },
+    {
+      "slug": "telly-tv",
+      "name": "Telly TV",
+      "aliases": [
+        "Telly TV",
+        "Telly",
+        "Telly, Inc.",
+        "Telly Inc"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments · Telly, Inc."
+    },
+    {
+      "slug": "tovala",
+      "name": "Tovala",
+      "aliases": [
+        "Tovala",
+        "Tovala Inc",
+        "Tovala Secondary",
+        "Tovala SPV"
+      ],
+      "assetClass": "VC",
+      "vehicle": "SPV",
+      "sponsor": "Spacestation Investments (SPV, lead) — Tovala"
+    },
+    {
+      "slug": "turbo-insurance",
+      "name": "Turbo Insurance",
+      "aliases": [
+        "Turbo Insurance",
+        "Turbo",
+        "Turbo Insurance Group"
+      ],
+      "assetClass": "Private Equity",
+      "vehicle": "SPV",
+      "sponsor": "Amplifi / GC SPV · Turbo Insurance Group"
     }
-  ]
+  ],
+  "reserved": [
+    "Asilia Credit Fund I",
+    "ACF1",
+    "Asilia Debt Fund",
+    "Asilia Debt Fund (2025)",
+    "Asilia Debt Fund 2025"
+  ],
+  "reservedNote": "Names that belong to a vehicle with no file here. A position typed as one of these resolves to nothing on purpose rather than to the nearest deal that happens to share its opening words, because inheriting another fund's terms silently is worse than supplying your own. Asilia Credit Fund I, also shown as the 2025 debt fund, was the track record behind the Credit Fund Evergreen and was never offered to Growth Circle."
 }
