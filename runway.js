@@ -149,7 +149,10 @@
     const stopAge = C.stopYear - C.birthYear;
     const endAge = C.planToAge;
     const nYears = endAge - stopAge + 1;
-    if (nYears < 1 || !sleeves.length) return null;
+    /* 130 matches diagnose()'s cut-off: a four-digit plan age is a calendar year in an age
+       box, and running it produces a two-thousand-year retirement that looks normal until you
+       read the axis. Refusing here is what makes the panel show diagnose()'s message. */
+    if (nYears < 1 || !sleeves.length || C.planToAge > 130) return null;
 
     const E = engineRef();
     const rnd = E ? E.makeRng(C.seed) : null;
@@ -515,7 +518,11 @@
       }
       if (!short) neverShort++;
       okRuns.push(short ? 0 : 1);
-      shares.push(got / want);
+      /* A PLAN THAT ASKS FOR NOTHING GOT ALL OF NOTHING, which is 1, not NaN. `want` is
+         zero whenever the whole horizon is covered by a benefit or by dated income, which is
+         a real thing to model and not an error, and the panel prints this as a percentage so
+         the one case that trivially succeeds was rendering as "NaN%". */
+      shares.push(want > 0 ? got / want : 1);
       fulls.push(nFull / nYears);
       worsts.push(worst);
       let end = 0;
@@ -673,6 +680,55 @@
 
   const Runway = { simulate, levers, DEFAULTS, SLEEVE_KINDS, DRAW_ORDER, DRAW_ORDERS,
                    normSleeves };
+  /* WHY THERE IS NOTHING TO SHOW, specifically. simulate() returns null for four different
+     reasons and the panel named two of them, which tells a reader with the third or fourth
+     nothing at all. The author knows which of his own numbers is odd; somebody running their
+     own sheet for the first time does not, and that is who this is for. */
+  function diagnose(cfg) {
+    const C = Object.assign({}, DEFAULTS, cfg || {});
+    const sl = (C.sleeves || []).filter((s) => Number(s && s.balance) > 0);
+    const stopAge = C.stopYear - C.birthYear;
+    if (!(C.sleeves || []).length) {
+      return { ok: false, why: 'no-sleeves',
+        msg: 'There are no balances to run this on. Add a <b>Balances</b> tab to your tracker '
+          + 'with one row per account and what is in it.' };
+    }
+    if (!sl.length) {
+      return { ok: false, why: 'zero-balances',
+        msg: 'Every balance on the Balances tab is zero, so there is nothing to draw on. If '
+          + 'that is a placeholder sheet, fill in the amounts and run it again.' };
+    }
+    if (!(stopAge > 0)) {
+      return { ok: false, why: 'stop-before-birth',
+        msg: 'The stop-work year (' + C.stopYear + ') is at or before the birth year ('
+          + C.birthYear + '). Check both on the <b>You</b> tab.' };
+    }
+    /* A FOUR-DIGIT PLAN AGE IS A YEAR IN AN AGE BOX. Somebody who has just typed 1968 for a
+       birth year and 2030 for a stop year is thinking in years, and the next field is an age.
+       Taken literally it ran a two-thousand-year retirement and said nothing. Refused rather
+       than corrected, because reading 2095 as 95 would be the tool guessing at an input, but
+       the message names what it probably meant. 130 is the cut-off: the oldest verified human
+       age is 122, so this leaves room for the most optimistic real plan. */
+    if (C.planToAge > 130) {
+      const guess = C.planToAge > 1900 && C.planToAge < 2200
+        ? C.planToAge - C.birthYear : null;
+      return { ok: false, why: 'plan-age-is-a-year',
+        msg: 'The plan runs to age <b>' + C.planToAge + '</b>, which is a year rather than an '
+          + 'age. ' + (guess && guess > 0 && guess < 130
+            ? 'Living to ' + C.planToAge + ' from a ' + C.birthYear + ' birth year is age <b>'
+              + guess + '</b>, which is probably what was meant.'
+            : 'Plan to age is an age, like 92, not a calendar year.') };
+    }
+    if (C.planToAge <= stopAge) {
+      return { ok: false, why: 'plan-age-too-low',
+        msg: 'The plan runs to age ' + C.planToAge + ', and work stops at age ' + stopAge
+          + ', so there are no retirement years to model. Either plan to a later age or stop '
+          + 'work sooner. A common cause is typing a YEAR where the plan age goes.' };
+    }
+    return { ok: true, why: null, msg: '' };
+  }
+
+  Runway.diagnose = diagnose;
   root.Runway = Runway;
   if (typeof module !== 'undefined' && module.exports) module.exports = Runway;
 }(typeof window !== 'undefined' ? window : globalThis));

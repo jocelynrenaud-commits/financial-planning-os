@@ -150,6 +150,62 @@
       two answers produced by different versions are not directly comparable.</p>
 
     <div class="rel">
+      <span class="tag">v1.47 &nbsp;&middot;&nbsp; 12 Oct 2026</span>
+      <h4>Hardening the retirement simulator for somebody else's numbers</h4>
+      <p><b>Everything in that tab had been tested against one book: mine.</b> The configurations that break a model are never the ones its author types, so rather than adding more examples I swept it for inputs where it produces something it cannot possibly mean. Three real defects came out.</p>
+      <p><b>A plan that asks for nothing printed &ldquo;NaN%&rdquo;.</b> The share of your target that got funded is a division, and a plan with no target divides by zero. Anyone modelling &ldquo;what if I live on the rental income alone&rdquo; hits it on the first try. A plan that asked for nothing got all of nothing, which is 100%.</p>
+      <p><b>A plan age typed as a year ran a two-thousand-year retirement without comment.</b> If you have just entered 1968 as a birth year and 2030 as a stop year, 2095 in the next box is an easy slip, and the model took it literally: every percentile computed, a result that looks entirely normal until you read the axis. It now refuses, and works out that 2095 from a 1968 birth year is age 127, so you can see the mistake rather than just be told there is one. It does <b>not</b> quietly read 2095 as 95, because guessing at what you typed is not something this tool does anywhere else.</p>
+      <p><b>And when there is nothing to run, it says which number is the problem.</b> There are four reasons the simulator can come back empty and the panel named two of them, which tells you nothing at all if you have one of the other two.</p>
+      <p>Seven regression tests cover those, plus the direction every answer has to move in: spending more can never improve a plan, more money can never make one worse, working longer can never hurt, and a one-time withdrawal has to cost something measurable. <b>That last one started as a weaker test that passed even with the feature switched off</b>, which is worth admitting, because a test that cannot fail is the thing these are meant to catch.</p>
+
+      <span class="tag">v1.46 &nbsp;&middot;&nbsp; 8 Oct 2026</span>
+      <h4>SpaceStation&rsquo;s final 2026 call is larger than its usual pace</h4>
+      <p>SpaceStation announced on 7 October that its last fund-wide capital call of 2026 will be 7.5% of commitment, with the notice on 2 November and payment due 17 November. That is $18,750 on the example book&rsquo;s $250,000 commitment, against the $12,500 (5%) quarterly pace the book had assumed, so the calls panel now shows $18,750 for 2026. The fund is also extending its Final Close past 31 October to the end of the year for new investors and commitment increases, which must be finalized by 13 November. No change to the model.</p>
+
+      <span class="tag">v1.45 &nbsp;&middot;&nbsp; 7 Oct 2026</span>
+      <h4>Asilia&rsquo;s second capital call is funded</h4>
+      <p>The example book&rsquo;s Asilia GC Fund call of 5 October has now been paid: $24,000 of the $100,000 commitment is funded and $76,000 is uncalled. Its next call goes back to the one the fund has guided for, about $20,000 in the first quarter of 2027, so the calls panel now shows $12,500 in 2026 (SpaceStation only) and $70,000 in 2027. The downloadable tracker carries the same figures. No change to the model.</p>
+
+      <span class="tag">v1.44 &nbsp;&middot;&nbsp; 6 Oct 2026</span>
+      <h4>Capital calls vs preferred income, split by position</h4>
+      <p><b>Asked for by Kristin Westergard</b>, after the same breakdown appeared under the ladder: which companies are calling, and which are paying, in each year. It is under the table on Liquidity Outlook.</p>
+      <p>Both sides of that panel are contractual rather than simulated, so unlike the outcome charts they can be attributed exactly. A call is money you are obliged to send and a preferred return is money the documents promise you.</p>
+      <p><b>It also answers a question you were about to have.</b> The preferred figures there are the full contractual schedule, which is why they read higher than the gold lines on the liquidity ladder. On the ladder that same income is weighted by how the deal actually goes, because it sits beside exit proceeds that are weighted the same way. Both are right for their own panel, and anyone comparing them side by side has every reason to think one is wrong, so the breakdown now says which is which.</p>
+      <p><b>Cash flow by year cannot have this</b>, and that is worth saying rather than quietly leaving it out. It is a percentile table: each row is whichever future happened to land at the 10th, 50th or 90th that year, and they are different futures. No set of deals makes up a percentile, so breaking one down would hand you a number that is not real. The ladder is a schedule, which is why it can be attributed.</p>
+
+      <span class="tag">v1.43 &nbsp;&middot;&nbsp; 5 Oct 2026</span>
+      <h4>The example book carries Asilia&rsquo;s second capital call</h4>
+      <p>Asilia GC Fund issued its second capital call on 5 October: 5% of commitment, due 19 October, which takes the fund to 24 per cent called. The example book now shows that call as its next one, so the calls panel puts $5,000 in 2026 and spreads the remaining $76,000 over the following three years. No change to the model.</p>
+
+      <span class="tag">v1.42 &nbsp;&middot;&nbsp; 3 Oct 2026</span>
+      <h4>Capital calls land when they can actually happen, and every panel agrees on them</h4>
+      <p><b>The example book showed SpaceStation calling $58,333 in 2026, when only one $12,500 call is left this year.</b> Two things caused it. The example book did not carry the next calls its owner already knows about, and the tool spread whatever was uncalled evenly over three years from the year after funding &mdash; including the months already behind you. Your uncalled figure is what is left <b>today</b>, so none of it can be called in the past. A modelled spread that would have started earlier now starts now: the current year shows only what is still ahead, and the tail runs on into a later year. The panel&rsquo;s old &ldquo;about $10k still ahead&rdquo; note is gone because the figure itself now means that.</p>
+      <p><b>A fund that calls at a known pace runs off at it.</b> SpaceStation has called 5% of commitment every quarter, so its file now says so and the balance runs off at 20% a year instead of an even three-year guess. The example book carries its real next calls (SpaceStation Q4 2026, Asilia Q1 2027). The deal&rsquo;s rate of return now uses the same call schedule as the calls panel; it had kept its own copy.</p>
+      <p><b>Other fixes from a full audit.</b></p>
+      <ul>
+        <li>A deal funded years ago could &ldquo;exit early&rdquo; into a year already gone, and that cash quietly vanished. Exits now never land before the current year. The calendar also runs as far as your book needs, so a long fund&rsquo;s tail no longer drops off the end.</li>
+        <li>A row with Uncalled filled in and Funded left blank now derives Funded from the other two. When all three are typed and do not add up, the page says so.</li>
+        <li>The ladder&rsquo;s &ldquo;Expected in the year&rdquo; row now uses the expected preferred return beside the expected exit, rather than the contractual one. Preferred-return columns now say whether they are contractual or typical.</li>
+        <li>Every panel on Performance &amp; Returns runs on the same 6,000 futures, so one sleeve no longer shows two medians.</li>
+        <li>Choosing a sleeve your book does not hold no longer strands you on an empty page.</li>
+        <li>The deal card&rsquo;s payout years follow a typed Exit likely.</li>
+        <li>The figures in &ldquo;Is venture only behind because it is held longer?&rdquo; are computed from your own book. They had been one portfolio&rsquo;s numbers, shown to everyone.</li>
+        <li>An assumed sponsor multiple is marked in the positions table.</li>
+      </ul>
+
+      <span class="tag">v1.41 &nbsp;&middot;&nbsp; 2 Oct 2026</span>
+      <h4>Two tranches of the same deal now share one fate</h4>
+      <p><b>If you bought into the same deal twice, the model was treating the two rows as two different companies.</b> Each drew its own outcome, so a single simulated future could write one tranche off entirely and pay the other its sponsor case. That cannot happen: one company has one fate. It also quietly manufactured diversification that does not exist, so two $10,000 tranches of one deal looked safer than one $20,000 position in it.</p>
+      <p>Rows are grouped by the deal they resolve to, not by name, so Eephus Growth Fund I and II stay independent as they should while two rows of the same fund do not. <b>If your book has tranches, your numbers will move</b> &mdash; the downside gets slightly worse and the upside slightly better, because the false averaging is gone. A book without tranches is unchanged to the cent.</p>
+      <p><b>What is NOT shared is the exit year.</b> That comes from each row's own dates, and overruling what you typed is not this tool's job. But one company only exits once, so if two rows of the same deal carry different exit years the page now says so and tells you to make them match. That usually happens when you filled the exit columns on one row and left them blank on the other, which makes the tool derive a different year from year funded plus hold.</p>
+
+      <span class="tag">v1.40 &nbsp;&middot;&nbsp; 2 Oct 2026</span>
+      <h4>A capital call you dated was being ignored by the preferred return</h4>
+      <p><b>Found by Kristin Westergard on her own book, and she was right to the dollar.</b> Her Asilia Evergreen row is $400,000 committed, nothing funded, and she had told the tool the next call is <b>Q1 2027</b>. The ladder still showed <b>$37,333</b> of income for 2026. It should have been <b>$26,000</b>, which is the yield on uncalled capital, because in 2026 none of it has been called.</p>
+      <p><b>Why.</b> v1.38 added the Next call date column and taught the capital-calls panel about it. It did not teach the preferred return, which kept its own copy of the old assumption that a commitment is drawn evenly over three years from the year after you funded. So the calls table said nothing arrives before 2027 while the coupon was being paid on a third of the commitment in 2026. The $37,333 was $20,000 of coupon on money that had not been called, plus $17,333 of yield on the rest. <b>There is now one schedule</b>, used by both, so they cannot disagree again.</p>
+      <p><b>Zero is no longer shown as a loss.</b> A deal whose typical outcome is &ldquo;you get your capital back&rdquo; has a rate of return of exactly zero, and the solver lands a hair underneath it, so the table printed a red &minus;0.0%. On a book with several single venture deals that is most of the column. Anything inside half a basis point now reads 0.0% in plain ink. The genuinely negative figures are unaffected, and a sleeve <i>can</i> show a small negative: that column is a yearly rate, so &minus;0.4% a year is a few per cent of capital over a hold, not a loss bigger than what you put in.</p>
+      <p><b>And the by-deal table keeps your order.</b> It used to sort by sponsor case and throw away the order you typed, which splits two tranches of the same deal apart and makes them hard to compare. Your tracker order is now the default, with buttons to re-sort by sponsor case, typical return or commitment.</p>
+
       <span class="tag">v1.39 &nbsp;&middot;&nbsp; 1 Oct 2026</span>
       <h4>The tracker itself now has the two capital-call columns</h4>
       <p><b>You do not have to download anything.</b> The columns are optional and the app works exactly as it always has without them, so an existing tracker keeps producing the figures it produced yesterday. This is only for people who want to start dating their calls.</p>
@@ -854,14 +910,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="engine.js"></script>
+<script src="engine.js?v=1.47"></script>
 <!-- THE FORK POINT, and the only place the two apps differ. runway.js and runway-ui.js load
      BEFORE app.js because the tab registers itself on window.APP_PLUGINS, which app.js reads
      once as it builds its tab list. Load them after and the tab silently never appears. -->
-<script src="history.js"></script>
-<script src="runway.js"></script>
-<script src="portfolio.js"></script>
-<script src="runway-ui.js"></script>
-<script src="app.js"></script>
+<script src="history.js?v=1.47"></script>
+<script src="runway.js?v=1.47"></script>
+<script src="portfolio.js?v=1.47"></script>
+<script src="runway-ui.js?v=1.47"></script>
+<script src="app.js?v=1.47"></script>
 </body>
 </html>

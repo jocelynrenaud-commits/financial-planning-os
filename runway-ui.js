@@ -693,9 +693,13 @@
     const lv = r ? root.Runway.levers(runCfg, { paths: 700 }) : null;
 
     if (!r) {
+      /* WHICH number is wrong, not a list of everything it could have been. */
+      const d = root.Runway.diagnose(runCfg);
       host.innerHTML = '<div class="card"><h2>Retirement Simulator</h2>'
-        + '<p class="note">This needs at least one sleeve with a balance, and a stop year '
-        + 'before the plan age.</p></div>';
+        + '<p class="note"><b>Nothing to run yet.</b> ' + (d && d.msg
+          ? d.msg
+          : 'This needs at least one sleeve with a balance, and a stop year before the plan '
+            + 'age.') + '</p></div>';
       return;
     }
 
