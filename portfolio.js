@@ -339,6 +339,22 @@
     cash: 'cash', 'money market': 'cash',
   };
 
+  /* WHICH TAX BUCKET AN ACCOUNT FALLS IN, from its name.
+
+     ROTH IS TESTED FIRST AND THAT IS THE WHOLE TRICK: "Roth IRA" contains "IRA", so checking
+     the pre-tax patterns first taxes tax-free money at the ordinary rate, which is the single
+     most expensive mistake available here. An HSA is tax-free on the way out for its purpose
+     and is grouped with Roth. Anything unrecognised is treated as TAXABLE, which is the
+     cautious default: it taxes the withdrawal at the gains rate rather than at zero. */
+  function taxTreatment(account, type) {
+    const t = (String(account || '') + ' ' + String(type || '')).toLowerCase();
+    if (/roth|hsa|529|tax.?free/.test(t)) return 'roth';
+    if (/401|403|457|tsp|sep|simple|trad|pre.?tax|deferred|\bira\b|sdira|rollover/.test(t)) {
+      return 'preTax';
+    }
+    return 'taxable';
+  }
+
   function kindOf(sleeve) {
     const k = low(sleeve);
     if (SLEEVE_KIND[k]) return { kind: SLEEVE_KIND[k], known: true };
@@ -411,6 +427,12 @@
       if (r.vol != null) { s.volW += r.vol * r.value; s.wVol += r.value; }
       if (r.yield != null) { s.yldW += r.yield * r.value; s.wYld += r.value; }
       if (!kk.known) s.unknown += r.value;
+      /* HOW THIS MONEY IS TAXED WHEN IT COMES OUT, carried as a value-weighted blend so a
+         Growth sleeve that is 70% 401k and 30% brokerage can be taxed as what it is. Read off
+         the account name, which people already type, rather than asking for another column. */
+      const tt = taxTreatment(r.account, r.type);
+      s.tax = s.tax || { preTax: 0, roth: 0, taxable: 0 };
+      s.tax[tt] += r.value;
     });
     Object.keys(byKind).forEach((k) => {
       const s = byKind[k];
@@ -422,6 +444,13 @@
       if (s.wVol > 0) out.sd = s.volW / s.wVol;
       if (s.wYld > 0) out.yield = s.yldW / s.wYld;
       out.unknownSleeveValue = s.unknown;
+      if (s.tax) {
+        const tot = s.tax.preTax + s.tax.roth + s.tax.taxable;
+        if (tot > 0) {
+          out.taxMix = { preTax: s.tax.preTax / tot, roth: s.tax.roth / tot,
+                         taxable: s.tax.taxable / tot };
+        }
+      }
       sleeves.push(out);
     });
 
@@ -451,6 +480,7 @@
   }
 
   root.Portfolio = { build, parseYou, parseBalances, parseProperty, parseCashflows,
+                     taxTreatment,
                      parseEvents, datedFlows, kindOf, SLEEVE_KIND };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.Portfolio;
 }(typeof window !== 'undefined' ? window : globalThis));

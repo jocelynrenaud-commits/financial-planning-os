@@ -707,7 +707,7 @@
       '<div class="card"><h2>Retirement Simulator</h2>'
       + '<p class="note">How long the money lasts, and what it leans on to get there.</p>'
       + sourceNote(port)
-      + '<p class="note"><b>It does not model tax</b>, and each stress is drawn '
+      + '<p class="note"><b>It models tax simply</b>, as one effective rate per account type rather than brackets: pre-tax accounts at 22%, taxable at 15%, Roth and HSA at nothing. Withdrawals are grossed up, so the spending figure is what you actually get to spend. There are no brackets, no state tax, no RMDs and no cost basis on the taxable sleeve, which is taxed on the whole withdrawal rather than on the gain and is therefore slightly harsh. Each stress is still drawn '
       + 'independently. Both flatter the result. <a href="#fpos-method">How this works and '
       + 'what it assumes</a> is at the foot of this tab.</p></div>'
       + panelControls(C)

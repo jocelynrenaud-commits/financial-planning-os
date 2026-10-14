@@ -76,6 +76,10 @@
     paths: 2000,
     seed: 20260929,
     sleeves: [],
+    /* SIMPLE TAX, federal only, as effective rates rather than brackets. Deliberately not a
+       tax engine: no brackets, no state, no RMDs, no conversion optimiser, and no basis
+       tracking on the taxable sleeve. Set tax.on to false to see the old pre-tax figures. */
+    tax: { on: true, preTax: 0.22, taxable: 0.15, roth: 0 },
   };
 
   /* engine.js declares `const Engine = {...}` at top-level script scope, and const does
@@ -122,6 +126,13 @@
         sd: s.sd != null ? Number(s.sd) : k.sd,
         yield: s.yield != null ? Number(s.yield) : k.yield,
         spendYieldFirst: k.spendYieldFirst,
+        /* CARRIED THROUGH, or the tax rate silently falls back to the pre-tax default
+           for every sleeve. normSleeves rebuilds each object field by field, so a
+           field it does not name is dropped -- and a dropped tax mix does not throw,
+           it just taxes a Roth account at 22% and reports a plausible number. Caught
+           by checking that an all-Roth book and an all-pre-tax book gave DIFFERENT
+           answers; they did not. */
+        taxMix: s.taxMix || null,
       };
     }).sort((a, b) => ord.indexOf(a.kind) - ord.indexOf(b.kind));
   }
@@ -145,6 +156,25 @@
     const target = sleeves.map((sv) => (total0 > 0 ? sv.balance / total0 : 0));
     const rebalancing = (C.rebalance === undefined ? 'annual' : C.rebalance) === 'annual';
     const arr = dealArrivals(C.dealSim);
+
+    /* THE EFFECTIVE RATE ON A WITHDRAWAL FROM EACH SLEEVE, blended from the accounts behind
+       it, so a Growth sleeve that is 70% 401k and 30% brokerage is taxed as what it is. A
+       sleeve with no stated mix is assumed PRE-TAX, because that is where most retirement
+       money actually sits and assuming tax-free would flatter the plan. */
+    const TAX = Object.assign({ on: true, preTax: 0.22, taxable: 0.15, roth: 0 }, C.tax || {});
+    const taxRate = sleeves.map((sv) => {
+      if (!TAX.on) return 0;
+      const m = sv.taxMix || { preTax: 1, roth: 0, taxable: 0 };
+      const r = (m.preTax || 0) * TAX.preTax + (m.taxable || 0) * TAX.taxable
+        + (m.roth || 0) * TAX.roth;
+      return Math.min(0.9, Math.max(0, r));     // a rate at 1 or above could never fund a year
+    });
+    /* GROSSED UP, NOT HAIRCUT, and the difference is the whole point. Funding $100,000 of
+       spending from a 22% sleeve costs $128,205 of balance, because the tax comes out of the
+       withdrawal and the spending has to survive it. Haircutting the balance instead would
+       understate the damage. */
+    const grossFor = (net, i) => net / (1 - taxRate[i]);
+    const netOf = (gross, i) => gross * (1 - taxRate[i]);
 
     const stopAge = C.stopYear - C.birthYear;
     const endAge = C.planToAge;
@@ -403,8 +433,11 @@
           const s = sleeves[i];
           const d = draw(s, hist, calYear - curveFrom);
           const inc = Math.max(0, bal[i] * d.yield);
-          const take = Math.min(rem, inc);
-          rem -= take; paid += take; took[i] += take; tookYield[i] = take;
+          /* Income is taxed on the way out like everything else, so what reaches the
+             spending is what survives the rate. */
+          const net = Math.min(rem, netOf(inc, i));
+          const take = grossFor(net, i);
+          rem -= net; paid += net; took[i] += take; tookYield[i] = take;
           bal[i] += (inc - take);                       // unspent income stays invested
           const before = bal[i];
           bal[i] *= (1 + d.price);
@@ -420,16 +453,20 @@
           if (pot > 0 && rem > 1) {
             const want = Math.min(rem, pot);
             for (let i = 0; i < sleeves.length; i++) {
-              const take = want * (bal[i] / pot);
-              rem -= take; paid += take; took[i] += take; tookPrin[i] += take;
-              bal[i] = Math.max(0, bal[i] - take);
+              const gross = Math.min(bal[i], grossFor(want * (bal[i] / pot), i));
+              const net = netOf(gross, i);
+              rem -= net; paid += net; took[i] += gross; tookPrin[i] += gross;
+              bal[i] = Math.max(0, bal[i] - gross);
             }
           }
         }
         for (let i = 0; i < sleeves.length && rem > 1; i++) {
-          const take = Math.min(rem, bal[i]);
-          rem -= take; paid += take; took[i] += take; tookPrin[i] += take;
-          bal[i] = Math.max(0, bal[i] - take);
+          /* The gross the shortfall needs, or everything left, whichever is smaller. A sleeve
+             that cannot cover the gross still pays what it can, net. */
+          const gross = Math.min(bal[i], grossFor(rem, i));
+          const net = netOf(gross, i);
+          rem -= net; paid += net; took[i] += gross; tookPrin[i] += gross;
+          bal[i] = Math.max(0, bal[i] - gross);
         }
 
         /* REBALANCE, after the year is funded and the returns are in. Restores the mix the
@@ -552,6 +589,9 @@
       sleeves,
       rebalancing,
       drawOrder: C.drawOrder || 'safe-first',
+      tax: { on: TAX.on, preTax: TAX.preTax, taxable: TAX.taxable, roth: TAX.roth,
+             bySleeve: sleeves.map((sv, i) => ({ label: sv.label, rate: taxRate[i],
+               mix: sv.taxMix || null })) },
       stopAge,
       endAge,
       neverShort: neverShort / nPaths,

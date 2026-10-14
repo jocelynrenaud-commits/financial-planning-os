@@ -150,6 +150,18 @@
       two answers produced by different versions are not directly comparable.</p>
 
     <div class="rel">
+      <span class="tag">v1.49 &nbsp;&middot;&nbsp; 13 Oct 2026</span>
+      <h4>The retirement simulator now takes tax out</h4>
+      <p><b>It was drawing from a pre-tax balance as though the whole figure were reachable.</b> For anyone with a large 401k or traditional IRA, which is most people, that reads optimistically, and it is exactly the gap a financial advisor's own model does not have.</p>
+      <p><b>Grossed up, not haircut, and the difference is the whole point.</b> If the plan needs $100,000 of spending and the money sits in a pre-tax account at 22%, the withdrawal is not $100,000 less tax. It is <b>$128,205</b>, because the tax comes out of the withdrawal and the spending has to survive it.</p>
+      <p><b>The rate comes from your account names, so there is no new column to fill in.</b> A Balances tab that says &ldquo;Fidelity 401k&rdquo;, &ldquo;Roth IRA&rdquo; and &ldquo;Schwab taxable&rdquo; is enough: each sleeve carries the value-weighted blend of the accounts behind it, so a Growth sleeve that is 70% 401k and 30% brokerage is taxed at 19.9%. Pre-tax 22%, taxable 15%, Roth and HSA nothing. An account it cannot place is treated as taxable rather than tax-free, which is the cautious way round.</p>
+      <p><b>What it is not:</b> no brackets, no state tax, no RMDs, no conversion planning, and no cost basis on the taxable sleeve, which is taxed on the whole withdrawal rather than on the gain and is therefore slightly harsh. The panel says all of that on screen rather than leaving you to find out.</p>
+      <p><i>Also:</i> the Trinity calibration tests now pin tax OFF explicitly. Trinity measured pre-tax withdrawals, so leaving the new default on would have been comparing two different questions and calling the gap a calibration error.</p>
+
+      <span class="tag">v1.48 &nbsp;&middot;&nbsp; 13 Oct 2026</span>
+      <h4>Hover the red and green bars to see who is calling and who is paying</h4>
+      <p><b>Asked for by Kristin Westergard.</b> On Capital calls vs. preferred income, point at a year&rsquo;s red bar (or its calls figure) to see which positions are calling and how much, and at the green bar (or its preferred figure) to see which are paying. It works the same way as the blocks and gold lines on the liquidity ladder. The full table under the panel is still there for reading years side by side, and both come from the same calculation, so they always agree. No change to the model.</p>
+
       <span class="tag">v1.47 &nbsp;&middot;&nbsp; 12 Oct 2026</span>
       <h4>Hardening the retirement simulator for somebody else's numbers</h4>
       <p><b>Everything in that tab had been tested against one book: mine.</b> The configurations that break a model are never the ones its author types, so rather than adding more examples I swept it for inputs where it produces something it cannot possibly mean. Three real defects came out.</p>
