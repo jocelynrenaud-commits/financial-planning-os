@@ -237,6 +237,10 @@
     /* One life, recorded step by step, when asked. Percentiles describe a population and
        hide the mechanism; some claims can only be checked by watching a single run. */
     const trace = C.trace ? [] : null;
+    /* WHICH path gets recorded. Path 0 is an arbitrary future and could be a disaster,
+       which is a poor thing to print as a year-by-year plan. medianTrace() below finds
+       the median-ending path and asks for that one. */
+    const traceAt = Math.max(0, Math.round(Number(C.traceAt) || 0));
     const okRuns = [];           // did this lifetime ever fall short
     const shares = [];           // share of target delivered
     const fulls = [];            // share of years paid in full
@@ -375,6 +379,13 @@
       for (let age = stopAge; age <= endAge; age++) {
         const yi = age - stopAge;
         const calYear = C.birthYear + age;
+        /* THE OPENING BALANCE, captured before anything touches it. The ledger has to foot:
+           last year's closing IS this year's opening, and reconstructing it afterwards from
+           balanceAfter minus growth plus withdrawals does not come back to the same number,
+           because rebalancing and the dated flows move money in between. Recorded rather
+           than derived. */
+        let openBal = 0;
+        for (let i = 0; i < bal.length; i++) openBal += bal[i];
         const full = baseSpend * inflF;
         const floor = baseFloor * inflF;
         const benefit = age >= C.benefitAge ? baseBenefit * inflF : 0;
@@ -429,10 +440,16 @@
         const tookYield = sleeves.map(() => 0);
         const tookPrin = sleeves.map(() => 0);
         const grew = sleeves.map(() => 0);
+        /* INCOME EARNED, as distinct from income SPENT. grew[] is price movement only,
+           and the part of a yield that is not drawn stays invested, so a ledger built
+           from opening + growth - withdrawals does not reach the closing balance. It
+           was out by exactly the retained income. */
+        const earned = sleeves.map(() => 0);
         for (let i = 0; i < sleeves.length; i++) {
           const s = sleeves[i];
           const d = draw(s, hist, calYear - curveFrom);
           const inc = Math.max(0, bal[i] * d.yield);
+          earned[i] = inc;
           /* Income is taxed on the way out like everything else, so what reaches the
              spending is what survives the rate. */
           const net = Math.min(rem, netOf(inc, i));
@@ -519,16 +536,16 @@
         const cj = calYear - curveFrom;
         if (cj >= 0 && cj < curve.length) curve[cj].push(left);
 
-        if (trace && p === 0) {
+        if (trace && p === traceAt) {
           trace.push({
-            year: calYear, age,
+            year: calYear, age, opening: openBal,
             fullTarget: full, asked, mode: C.mode,
             benefit: fromBenefit,
             dated: (C.dated && C.dated[calYear]) ? C.dated[calYear].net : 0,
             deals: fromDeals,
             dealsAvailable: Math.max(0, mine[calYear] || 0),
             sleeves: sleeves.map((sv, i) => ({
-              label: sv.label, yield: tookYield[i], principal: tookPrin[i],
+              label: sv.label, yield: tookYield[i], principal: tookPrin[i], income: earned[i],
               growth: grew[i], balanceAfter: bal[i],
             })),
             paid, unmet: rem > 1 ? rem : 0, short: rem > 1,
@@ -589,6 +606,9 @@
       sleeves,
       rebalancing,
       drawOrder: C.drawOrder || 'safe-first',
+      /* Every path's ending wealth, in path order, so a caller can find which future
+         sat in the middle and ask for that one to be traced. */
+      terminalByPath: terms.slice(),
       tax: { on: TAX.on, preTax: TAX.preTax, taxable: TAX.taxable, roth: TAX.roth,
              bySleeve: sleeves.map((sv, i) => ({ label: sv.label, rate: taxRate[i],
                mix: sv.taxMix || null })) },
@@ -768,6 +788,29 @@
     return { ok: true, why: null, msg: '' };
   }
 
+  /* ONE COHERENT FUTURE, the middle one, as a year-by-year ledger.
+
+     The byYear rows are percentiles and cannot be read down: the median wealth in 2040 and the
+     median wealth in 2041 belong to different futures, so the difference between them is not a
+     cash flow. A table built from those would invite exactly the arithmetic it cannot survive.
+
+     This runs the model, finds the path whose ENDING wealth is the median, and runs it again
+     asking for that path to be recorded. The generator is seeded, so the second pass reproduces
+     the same futures exactly. What comes back is a real future that happened, which adds up
+     line by line, and which is representative in the only sense that matters for a plan. */
+  function medianTrace(cfg) {
+    const first = simulate(Object.assign({}, cfg || {}));
+    if (!first || !first.terminalByPath || !first.terminalByPath.length) return null;
+    const idx = first.terminalByPath
+      .map((v, i) => [v, i])
+      .sort((a, b) => a[0] - b[0])[Math.floor(first.terminalByPath.length / 2)][1];
+    const second = simulate(Object.assign({}, cfg || {}, { trace: true, traceAt: idx }));
+    if (!second || !second.trace) return null;
+    return { pathIndex: idx, rows: second.trace, terminal: first.terminalByPath[idx],
+             of: first.terminalByPath.length };
+  }
+
+  Runway.medianTrace = medianTrace;
   Runway.diagnose = diagnose;
   root.Runway = Runway;
   if (typeof module !== 'undefined' && module.exports) module.exports = Runway;

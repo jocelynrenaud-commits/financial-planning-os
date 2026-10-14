@@ -573,6 +573,76 @@
      that is maintained by hand drifts away from the code it describes, and then it is worse
      than nothing: it is a confident description of a model that no longer exists. The same
      discipline the deal tabs use for their outcome odds. */
+  /* ONE FUTURE, WRITTEN OUT. Every other panel here is a range, and a range cannot be read
+     down a column: the median wealth in 2040 and the median wealth in 2041 belong to different
+     futures, so the difference between them is not a cash flow. This is the median-ENDING
+     path, a real future that happened, which is why it adds up line by line.
+
+     That distinction is the whole reason the panel says which future it is in its first
+     sentence rather than in a footnote. A reader who takes this for "the plan" has mistaken
+     one draw out of twelve hundred for a forecast. */
+  function panelLedger(cfg) {
+    const mt = root.Runway.medianTrace(cfg);
+    if (!mt || !mt.rows || !mt.rows.length) return '';
+    const stopAge = mt.rows[0].age;
+
+    let h = '<div class="card"><h2>Year by year</h2>'
+      + '<p class="note"><b>This is one future, not the range.</b> Everything above is a band '
+      + 'across ' + mt.of.toLocaleString('en-US') + ' simulated lifetimes. This table is a '
+      + 'single one of them, chosen because it ends with the <b>middle</b> result, so it can '
+      + 'be read down a column and added up the way a spreadsheet can. The bands above are '
+      + 'what to plan against; this is for checking that the arithmetic behaves.</p>'
+      + '<p class="note">Last year&rsquo;s closing balance is this year&rsquo;s opening, and '
+      + 'every row reconciles: <b>opening, plus return, less what was withdrawn, plus any '
+      + 'deal money left over, gives the closing balance</b>. A deal pays for that year '
+      + 'first and only the remainder is invested, so the Deals column shows what arrived '
+      + 'and the note beside it shows how much of that the year actually needed. The '
+      + 'benefit never passes through the portfolio at all.</p>'
+      + '<p class="note"><b>Withdrawn is larger than spending</b>, because the tax comes '
+      + 'out of the withdrawal. In a year when a deal pays, spending can be larger than '
+      + 'the withdrawal instead.</p>'
+      + '<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;'
+      + 'font-size:13px">Open the ledger (' + mt.rows.length + ' years)</summary>'
+      + '<table style="margin-top:10px"><tr><th class="l">Year</th><th>Age</th>'
+      + '<th>Opening</th><th>Return</th><th>Withdrawn</th><th>Tax</th>'
+      + '<th>Benefit</th><th>Deals</th><th>Spending</th><th>Closing</th></tr>';
+
+    for (const r of mt.rows) {
+      const ret = r.sleeves.reduce((a, sv) => a + sv.growth + sv.income, 0);
+      const gross = r.sleeves.reduce((a, sv) => a + sv.yield + sv.principal, 0);
+      const close = r.sleeves.reduce((a, sv) => a + sv.balanceAfter, 0);
+      /* What the tax took is the gap between the gross withdrawal and the part of it that
+         reached the spending. Derived rather than carried, so it cannot disagree with the
+         balances either side of it. */
+      const fromSleeves = r.paid - r.benefit - r.deals - (r.dated > 0 ? r.dated : 0);
+      const tax = Math.max(0, gross - fromSleeves);
+      const arrived = Math.max(r.deals || 0, r.dealsAvailable || 0);
+      h += '<tr' + (r.short ? ' class="hi"' : '') + '>'
+        + '<td class="l b">' + r.year + (r.age === stopAge
+          ? ' <span class="muted" style="font-size:10px">work stops</span>' : '') + '</td>'
+        + '<td>' + r.age + '</td>'
+        + '<td>' + money(r.opening) + '</td>'
+        + '<td class="' + (ret < 0 ? 'neg' : 'pos') + '">' + money(ret) + '</td>'
+        + '<td class="neg">' + (gross > 0.5 ? '-' + money(gross) : '&mdash;') + '</td>'
+        + '<td class="' + (tax > 0.5 ? 'neg' : 'z') + '">'
+        + (tax > 0.5 ? '-' + money(tax) : '&mdash;') + '</td>'
+        + '<td class="' + (r.benefit > 0.5 ? 'pos' : 'z') + '">'
+        + (r.benefit > 0.5 ? money(r.benefit) : '&mdash;') + '</td>'
+        /* WHAT ARRIVED, not what was spent. The arrived figure is the one that makes
+           the row add up, because the part the year did not need is invested. */
+        + '<td class="' + (arrived > 0.5 ? 'pos' : 'z') + '">'
+        + (arrived > 0.5 ? money(arrived)
+            + (r.deals > 0.5 ? ' <span class="muted" style="font-size:10px">'
+                + money(r.deals) + ' spent</span>' : '')
+          : '&mdash;') + '</td>'
+        + '<td class="b">' + money(r.paid)
+        + (r.short ? ' <span class="neg" style="font-size:10px">short '
+            + money(r.unmet) + '</span>' : '') + '</td>'
+        + '<td>' + money(close) + '</td></tr>';
+    }
+    return h + '</table></details></div>';
+  }
+
   function panelMethod(r, C) {
     const K = root.Runway.SLEEVE_KINDS || {};
     /* The order ACTUALLY IN FORCE, not the default. Printing the default while the reader
@@ -717,6 +787,7 @@
       + panelBreaks(r)
       + panelLevers(lv)
       + panelComposition(r)
+      + panelLedger(runCfg)
       + panelMethod(r, C);
 
     host.querySelectorAll('[data-rw]').forEach((el) => {

@@ -150,6 +150,12 @@
       two answers produced by different versions are not directly comparable.</p>
 
     <div class="rel">
+      <span class="tag">v1.50 &nbsp;&middot;&nbsp; 13 Oct 2026</span>
+      <h4>Year by year, written out as a ledger</h4>
+      <p><b>The one view an advisor hands you that this did not have.</b> Everything else on the Retirement Simulator is a range, and a range cannot be read down a column: the median wealth in 2040 and the median wealth in 2041 come from different futures, so the difference between them is not a cash flow. A table built that way would invite exactly the arithmetic it cannot survive.</p>
+      <p><b>So this is one future, not a row of medians.</b> It is the single simulated lifetime that ends with the middle result, which means it adds up line by line: last year's closing balance is this year's opening, and opening plus return, less what was withdrawn, plus any deal money left over, gives the closing balance. The bands above are what to plan against; this is for checking that the arithmetic behaves.</p>
+      <p>Two things the table makes visible that the bands never could. <b>Withdrawn is larger than spending</b>, because the tax comes out of the withdrawal. And in a year when a deal pays, <b>spending can be larger than the withdrawal</b> instead: a deal pays for its year first, and only the remainder is invested, which is why the Deals column shows what arrived with the part the year actually needed beside it.</p>
+
       <span class="tag">v1.49 &nbsp;&middot;&nbsp; 13 Oct 2026</span>
       <h4>The retirement simulator now takes tax out</h4>
       <p><b>It was drawing from a pre-tax balance as though the whole figure were reachable.</b> For anyone with a large 401k or traditional IRA, which is most people, that reads optimistically, and it is exactly the gap a financial advisor's own model does not have.</p>
